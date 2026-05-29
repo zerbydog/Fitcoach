@@ -579,10 +579,10 @@ async function loadData(){
     sb.from('rest_days').select('*')
   ]);
   console.log('trackers:',tErr||tData?.length,'logs:',lErr||lData?.length,'rest:',rErr||rData?.length);
-  trackers=(tData||[]).map(t=>({id:t.id,name:t.name,cat:t.cat,unit:t.unit,target:t.target,deadline:t.deadline,dir:t.dir||'up',logtype:t.logtype||'latest',sort_order:t.sort_order||0}));
-  await loadFriendsData();
+  trackers=(tData||[]).map(t=>({id:t.id,name:t.name,cat:t.cat,unit:t.unit,target:t.target,deadline:t.deadline,dir:t.dir||'up',logtype:t.logtype||'latest',sort_order:t.sort_order||0,visibility:t.visibility||'private'}));
   logs=(lData||[]).map(l=>({id:l.id,tid:l.tracker_id,val:l.val,note:l.note||'',date:l.date}));
   restDays=(rData||[]).map(r=>r.date);
+  await loadFriendsData();
 }
 function showToast(msg){const t=document.getElementById('save-toast');t.textContent=msg||'Saved';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
 
@@ -943,6 +943,7 @@ let friends=[],pendingReceived=[],pendingSent=[],challenges=[],challengeLogs=[],
 let viewingFriendId=null,challengingFriendId=null,loggingChallengeId=null;
 
 async function loadFriendsData(){
+  try{
   const[{data:fData},{data:cData},{data:clData}]=await Promise.all([
     sb.from('friends').select('*'),
     sb.from('challenges').select('*').order('created_at',{ascending:false}),
@@ -966,6 +967,7 @@ async function loadFriendsData(){
     (pData||[]).forEach(p=>{friendProfiles[p.id]=p;});
   }
   updateFriendsNavBadge();
+  }catch(e){console.log('Friends data error:',e);}
 }
 
 function updateFriendsNavBadge(){

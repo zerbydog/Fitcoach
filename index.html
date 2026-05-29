@@ -240,9 +240,9 @@ body.dark .rest-btn{color:#fde68a}
 .library-item-preview{font-size:12px;color:var(--text-muted);line-height:1.5;overflow:hidden;max-height:40px;transition:max-height .3s}
 .library-item-preview.expanded{max-height:600px}
 .library-item-actions{display:flex;gap:6px;margin-top:6px}
-.save-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.save-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
 .save-modal-overlay.open{display:flex}
-.save-modal-sheet{background:var(--card-bg);border-radius:16px 16px 0 0;padding:1.25rem;width:100%;max-width:500px;border-top:1px solid var(--border)}
+.save-modal-sheet{background:var(--card-bg);border-radius:14px;padding:1.25rem;width:340px;max-height:80vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.2)}
 .save-sheet-title{font-size:15px;font-weight:700;margin-bottom:1rem}
 .folder-pick-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg);cursor:pointer;width:100%;font-family:inherit;font-size:13px;color:var(--text);margin-bottom:8px;transition:background .15s}
 .folder-pick-btn:hover{background:var(--bg)}
@@ -1195,6 +1195,18 @@ async function loadLibrary(){
   ]);
   libraryFolders=fData||[];
   libraryItems=iData||[];
+  // Create default folders if none exist
+  if(libraryFolders.length===0){
+    const defaults=[
+      {name:'Workouts',icon:'&#127939;'},
+      {name:'Recipes',icon:'&#127859;'},
+      {name:'Motivation',icon:'&#128293;'}
+    ];
+    for(const f of defaults){
+      const{data}=await sb.from('library_folders').insert({user_id:currentUser.id,...f}).select().single();
+      if(data)libraryFolders.push(data);
+    }
+  }
 }
 
 function renderLibrary(){
@@ -1965,7 +1977,14 @@ async function showFriendChart(tid,fid){
   const filtered=filterByRange(entries,activeTimeRange);
   if(!filtered.length){card.innerHTML='<div class="no-data">No data for this time range.</div>';return;}
   const useWeekly=activeTimeRange==='year'||activeTimeRange==='all';
-  const points=useWeekly?aggregateWeekly(filtered):filtered.map(e=>({label:e.date.slice(5),val:e.val}));
+  // For cumulative trackers, sum entries per day before plotting
+  let plotEntries=filtered;
+  if(t.logtype==='cumulative'&&!useWeekly){
+    const dayMap={};
+    filtered.forEach(e=>{dayMap[e.date]=(dayMap[e.date]||0)+e.val;});
+    plotEntries=Object.entries(dayMap).sort((a,b)=>a[0].localeCompare(b[0])).map(([date,val])=>({date,val}));
+  }
+  const points=useWeekly?aggregateWeekly(plotEntries):plotEntries.map(e=>({label:e.date.slice(5),val:e.val}));
   card.innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:2px">'+t.name+' <span style="font-size:12px;font-weight:400;color:var(--text-muted)">('+getFriendEmail(fid)+')</span></div><div style="font-size:12px;color:var(--text-muted);margin-bottom:1rem">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target+' '+t.unit:'')+'</div><div style="position:relative;width:100%;height:240px"><canvas id="prog-chart"></canvas></div>';
   if(activeChartInst)activeChartInst.destroy();
   const isDark=document.body.classList.contains('dark');
@@ -2072,8 +2091,18 @@ function renderAll(){renderStreakBanner();renderMetrics();renderTrackersList();r
 // AI COACH
 const sysPrompt='You are FitCoach AI, an energetic personal fitness coach. Be concise (2-4 sentences), specific, and motivating.';
 function buildCtx(){
-  if(!trackers.length)return 'No trackers set up yet.';
-  const s=calcStreak();let ctx='Overall streak: '+s+' day'+(s!==1?'s':'')+'\n';
+  const p=userProfile||{};
+  const isImperial=(p.units||'imperial')==='imperial';
+  let profileCtx='User profile:\n';
+  if(p.display_name)profileCtx+='Name: '+p.display_name+'\n';
+  if(p.birthday){const age=calcAge(p.birthday);if(age)profileCtx+='Age: '+age+' years old\n';}
+  if(p.height_cm)profileCtx+='Height: '+(isImperial?cmToFtIn(p.height_cm):p.height_cm+' cm')+'\n';
+  if(p.weight_kg)profileCtx+='Weight: '+(isImperial?kgToLbs(p.weight_kg)+' lbs':p.weight_kg+' kg')+'\n';
+  if(p.fitness_level)profileCtx+='Fitness level: '+p.fitness_level+'\n';
+  if(p.diet)profileCtx+='Diet: '+p.diet+'\n';
+  if(p.goal)profileCtx+='Main goal: '+p.goal+'\n';
+  if(!trackers.length)return profileCtx+'No trackers set up yet.';
+  const s=calcStreak();let ctx=profileCtx+'Overall streak: '+s+' day'+(s!==1?'s':'')+'\n';
   trackers.forEach(t=>{
     const entries=logs.filter(l=>l.tid===t.id).sort((a,b)=>a.date.localeCompare(b.date));
     const latest=entries.length?entries[entries.length-1]:null;const ts=calcTrackerStreak(t.id);const pr=getTrackerPR(t.id);

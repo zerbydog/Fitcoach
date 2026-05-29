@@ -572,11 +572,13 @@ async function showApp(){
 
 // DATA
 async function loadData(){
-  const[{data:tData},{data:lData},{data:rData}]=await Promise.all([
+  console.log('loadData started');
+  const[{data:tData,error:tErr},{data:lData,error:lErr},{data:rData,error:rErr}]=await Promise.all([
     sb.from('trackers').select('*').order('sort_order',{ascending:true}).order('created_at'),
     sb.from('logs').select('*').order('date'),
     sb.from('rest_days').select('*')
   ]);
+  console.log('trackers:',tErr||tData?.length,'logs:',lErr||lData?.length,'rest:',rErr||rData?.length);
   trackers=(tData||[]).map(t=>({id:t.id,name:t.name,cat:t.cat,unit:t.unit,target:t.target,deadline:t.deadline,dir:t.dir||'up',logtype:t.logtype||'latest',sort_order:t.sort_order||0}));
   await loadFriendsData();
   logs=(lData||[]).map(l=>({id:l.id,tid:l.tracker_id,val:l.val,note:l.note||'',date:l.date}));

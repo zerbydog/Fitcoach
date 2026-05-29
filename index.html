@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +10,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --green:#1D9E75;--green-dark:#0F6E56;--green-light:#f0faf6;
-  --orange:#D85A30;--purple:#7c3aed;
+  --orange:#D85A30;--purple:#7c3aed;--gold:#f59e0b;
   --bg:#f5f5f0;--border:#e8e8e8;--border-soft:#f0f0f0;
   --text:#1a1a1a;--text-muted:#888;--text-light:#aaa;
 }
@@ -54,8 +55,9 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 .sec-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
 .card{background:white;border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px}
 .metrics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px;margin-bottom:1.25rem}
-.metric-card{background:white;border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:box-shadow .15s}
+.metric-card{background:white;border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:box-shadow .15s;position:relative}
 .metric-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.metric-card.pr-card{border-color:var(--gold);background:linear-gradient(135deg,#fffbeb,#fff)}
 .metric-label{font-size:12px;color:var(--text-muted);margin-bottom:5px;display:flex;align-items:center;gap:5px}
 .metric-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
 .metric-value{font-size:20px;font-weight:700}
@@ -63,6 +65,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 .metric-target{font-size:11px;color:var(--text-muted);margin-top:3px}
 .metric-deadline{font-size:10px;color:var(--purple);margin-top:2px;font-weight:600}
 .metric-streak{font-size:10px;color:var(--orange);margin-top:2px;font-weight:600}
+.pr-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:white;background:var(--gold);border-radius:99px;padding:2px 7px;margin-top:3px}
 .delta-up{color:var(--green)}.delta-down{color:var(--orange)}
 .form-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .form-row label{font-size:13px;color:#666;min-width:90px;font-weight:500}
@@ -76,6 +79,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 .ghost-btn{background:none;border:1px solid #ddd;border-radius:8px;padding:7px 14px;font-size:13px;color:#666;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;transition:all .15s}
 .ghost-btn:hover{background:#f5f5f5;color:#333}
 .entry-item{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:#f9f9f7;border-radius:8px;margin-bottom:6px}
+.entry-item.pr-entry{background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fde68a}
 .entry-name{font-size:13px;font-weight:600}
 .entry-meta{font-size:12px;color:var(--text-muted)}
 .badge{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600;white-space:nowrap}
@@ -90,6 +94,9 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 .chart-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 .chart-tab{font-size:12px;padding:5px 12px;border:1px solid #ddd;border-radius:99px;background:white;cursor:pointer;color:#666;font-family:inherit;transition:all .15s}
 .chart-tab.active{background:var(--green);border-color:var(--green);color:white;font-weight:600}
+.time-tabs{display:flex;gap:4px;margin-bottom:12px}
+.time-tab{font-size:11px;padding:4px 10px;border:1px solid #ddd;border-radius:99px;background:white;cursor:pointer;color:#666;font-family:inherit;transition:all .15s}
+.time-tab.active{background:#1a1a1a;border-color:#1a1a1a;color:white;font-weight:600}
 .no-data{text-align:center;padding:2rem;color:var(--text-light);font-size:13px;line-height:1.6}
 .no-data strong{display:block;margin-bottom:6px;color:#888;font-size:14px}
 .ai-msg{font-size:13px;line-height:1.75;padding:10px 14px;background:var(--green-light);border-radius:10px;margin-bottom:8px}
@@ -132,6 +139,13 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 .loading-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px;color:var(--text-muted);font-size:14px}
 .spin{width:28px;height:28px;border:3px solid var(--green-light);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.todo-item{display:flex;align-items:center;gap:10px;padding:9px 13px;background:#f9f9f7;border-radius:8px;margin-bottom:6px}
+.todo-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.rest-btn{background:#fff8f0;border:1px solid #fde68a;color:#92400e;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.rest-btn.active{background:#fde68a;border-color:#f59e0b}
+.day-group{margin-bottom:14px}
+.day-group-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.custom-cat-wrap{display:none;margin-top:6px}
 </style>
 </head>
 <body>
@@ -193,19 +207,21 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 
 <div class="nav">
   <button class="nav-btn active" onclick="switchTab('log',this)">&#128203; Log</button>
+  <button class="nav-btn" onclick="switchTab('todo',this)">&#9989; To-Do</button>
   <button class="nav-btn" onclick="switchTab('summary',this)">&#128202; Summary</button>
   <button class="nav-btn" onclick="switchTab('graphs',this)">&#128200; Graphs</button>
   <button class="nav-btn" onclick="switchTab('trackers',this)">&#9881;&#65039; Trackers</button>
   <button class="nav-btn" onclick="switchTab('coach',this)">&#129302; Coach</button>
 </div>
 
+<!-- LOG TAB -->
 <div id="tab-log" class="tab active">
   <div id="log-empty-state" style="display:none">
     <div class="card empty-state">
       <div class="icon">&#128202;</div>
       <h3>No trackers yet</h3>
       <p>Create your first tracker to start logging.</p>
-      <button class="green-btn" onclick="switchTab('trackers',document.querySelectorAll('.nav-btn')[3]);setTimeout(openAddTracker,100)">+ Create your first tracker</button>
+      <button class="green-btn" onclick="switchTab('trackers',document.querySelectorAll('.nav-btn')[4]);setTimeout(openAddTracker,100)">+ Create your first tracker</button>
     </div>
   </div>
   <div id="log-form-area">
@@ -215,26 +231,44 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
       <div class="form-row"><label>Value</label><input type="number" id="log-val" placeholder="e.g. 225" step="any"/><span class="unit-lbl" id="log-unit-lbl"></span></div>
       <div class="form-row"><label>Date</label><input type="date" id="log-date"/></div>
       <div class="form-row"><label>Note <span style="color:#aaa;font-size:11px">(optional)</span></label><input type="text" id="log-note" placeholder="e.g. felt strong today"/></div>
-      <button class="green-btn" id="log-btn" onclick="addLog()">+ Log entry</button>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="green-btn" id="log-btn" onclick="addLog()">+ Log entry</button>
+        <button class="rest-btn" id="rest-day-btn" onclick="toggleRestDay()">&#128564; Rest day</button>
+      </div>
     </div>
     <div class="sec-title" style="margin-top:1rem">Recent entries</div>
     <div id="recent-entries"></div>
   </div>
 </div>
 
+<!-- TO-DO TAB -->
+<div id="tab-todo" class="tab">
+  <div class="sec-title">Not logged today</div>
+  <div id="todo-content"></div>
+</div>
+
+<!-- SUMMARY TAB -->
 <div id="tab-summary" class="tab"><div id="summary-content"></div></div>
 
+<!-- GRAPHS TAB -->
 <div id="tab-graphs" class="tab">
   <div id="graphs-empty" style="display:none">
     <div class="card empty-state"><div class="icon">&#128200;</div><h3>Nothing to graph yet</h3><p>Add trackers and log some entries to see your progress charts here.</p></div>
   </div>
   <div id="graphs-content">
-    <div class="sec-title">Select a tracker to graph</div>
+    <div class="sec-title">Select a tracker</div>
     <div class="chart-tabs" id="chart-tabs"></div>
+    <div class="time-tabs">
+      <button class="time-tab active" onclick="setTimeRange('week',this)">Week</button>
+      <button class="time-tab" onclick="setTimeRange('month',this)">Month</button>
+      <button class="time-tab" onclick="setTimeRange('year',this)">Year</button>
+      <button class="time-tab" onclick="setTimeRange('all',this)">All time</button>
+    </div>
     <div class="card" id="chart-card"><div class="no-data">Select a tracker above to see your progress chart.</div></div>
   </div>
 </div>
 
+<!-- TRACKERS TAB -->
 <div id="tab-trackers" class="tab">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
     <div class="sec-title" style="margin-bottom:0">Your trackers</div>
@@ -243,11 +277,12 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
   <div class="card" style="padding:0;overflow:hidden"><div id="trackers-list"></div></div>
 </div>
 
+<!-- COACH TAB -->
 <div id="tab-coach" class="tab">
   <div class="card">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
       <div style="width:32px;height:32px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><line x1="12" y1="7" x2="12" y2="11"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap:round stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><line x1="12" y1="7" x2="12" y2="11"/></svg>
       </div>
       <div><div style="font-size:14px;font-weight:700">Coach AI</div><div style="font-size:12px;color:var(--text-muted)">Knows your tracker data</div></div>
     </div>
@@ -265,14 +300,29 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 
 <div class="save-toast" id="save-toast">Saved</div>
 
+<!-- Tracker modal -->
 <div class="overlay" id="tracker-modal">
   <div class="modal">
     <div class="modal-title" id="modal-title">New tracker</div>
     <div class="modal-row"><label>Name</label><input id="t-name" placeholder="e.g. Bench press PR"/></div>
-    <div class="modal-row"><label>Category</label>
-      <select id="t-cat"><option>Strength</option><option>Cardio</option><option>Basketball</option><option>Nutrition</option><option>Sleep</option><option>Recovery</option><option>Custom</option></select>
+    <div class="modal-row">
+      <label>Category</label>
+      <select id="t-cat" onchange="toggleCustomCat()">
+        <option>Strength</option><option>Cardio</option><option>Basketball</option>
+        <option>Nutrition</option><option>Sleep</option><option>Recovery</option><option value="Custom">Custom...</option>
+      </select>
+      <div class="custom-cat-wrap" id="custom-cat-wrap">
+        <input id="t-cat-custom" placeholder="Enter custom category" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;margin-top:6px"/>
+      </div>
     </div>
     <div class="modal-row"><label>Unit</label><input id="t-unit" placeholder="e.g. lbs, kcal, hrs, min"/></div>
+    <div class="modal-row">
+      <label>Log type</label>
+      <select id="t-logtype">
+        <option value="latest">Latest value (e.g. bench press, weight, sleep)</option>
+        <option value="cumulative">Daily total (e.g. calories, steps, water)</option>
+      </select>
+    </div>
     <div class="modal-row"><label>Target (optional)</label><input id="t-target" type="number" placeholder="e.g. 225"/></div>
     <div class="modal-row"><label>Deadline (optional)</label><input id="t-deadline" type="date"/></div>
     <div class="modal-row"><label>Target direction</label>
@@ -285,6 +335,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
   </div>
 </div>
 
+<!-- Target modal -->
 <div class="overlay" id="target-modal">
   <div class="modal">
     <div class="modal-title" id="tgt-modal-title">Edit target</div>
@@ -303,140 +354,129 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const SUPABASE_URL = 'https://ddferudzeppmvyljymbq.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_ol_pvojRI22Z34_MYQouHQ_Lu7PbZ62';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let currentUser = null, trackers = [], logs = [];
+const SUPABASE_URL='https://ddferudzeppmvyljymbq.supabase.co';
+const SUPABASE_KEY='sb_publishable_ol_pvojRI22Z34_MYQouHQ_Lu7PbZ62';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let currentUser=null,trackers=[],logs=[],restDays=[];
 
 // AUTH
-let authMode = 'signin';
-
-async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) { currentUser = session.user; await showApp(); }
-  else { showAuthScreen(); }
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) { currentUser = session.user; await showApp(); }
-    else if (event === 'SIGNED_OUT') { currentUser = null; showAuthScreen(); }
+let authMode='signin';
+async function init(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){currentUser=session.user;await showApp();}
+  else showAuthScreen();
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN'&&session){currentUser=session.user;await showApp();}
+    else if(event==='SIGNED_OUT'){currentUser=null;showAuthScreen();}
   });
 }
-
-function setAuthMode(mode) {
-  authMode = mode;
-  const isIn = mode === 'signin';
-  document.getElementById('tab-signin-btn').className = 'auth-tab' + (isIn ? ' active' : '');
-  document.getElementById('tab-signup-btn').className = 'auth-tab' + (!isIn ? ' active' : '');
-  document.getElementById('auth-btn').textContent = isIn ? 'Sign In' : 'Sign Up';
-  document.getElementById('auth-password').placeholder = isIn ? 'Password' : 'Create a password (min 6 chars)';
-  document.getElementById('auth-password').autocomplete = isIn ? 'current-password' : 'new-password';
-  document.getElementById('forgot-row').style.display = isIn ? 'block' : 'none';
-  document.getElementById('auth-err').style.display = 'none';
-  document.getElementById('auth-info').style.display = 'none';
+function setAuthMode(mode){
+  authMode=mode;const isIn=mode==='signin';
+  document.getElementById('tab-signin-btn').className='auth-tab'+(isIn?' active':'');
+  document.getElementById('tab-signup-btn').className='auth-tab'+(!isIn?' active':'');
+  document.getElementById('auth-btn').textContent=isIn?'Sign In':'Sign Up';
+  document.getElementById('auth-password').placeholder=isIn?'Password':'Create a password (min 6 chars)';
+  document.getElementById('forgot-row').style.display=isIn?'block':'none';
+  document.getElementById('auth-err').style.display='none';
+  document.getElementById('auth-info').style.display='none';
 }
-
-function togglePw() {
-  const pw = document.getElementById('auth-password');
-  const eye = document.getElementById('pw-eye');
-  pw.type = pw.type === 'password' ? 'text' : 'password';
-  eye.innerHTML = pw.type === 'text' ? '&#128584;' : '&#128065;';
-}
-
-async function handleAuth() {
-  const email = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
-  const remember = document.getElementById('remember-me').checked;
-  const errEl = document.getElementById('auth-err');
-  const infoEl = document.getElementById('auth-info');
-  const btn = document.getElementById('auth-btn');
-  errEl.style.display = 'none'; infoEl.style.display = 'none';
-  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; errEl.style.display = 'block'; return; }
-  btn.disabled = true;
-  btn.textContent = authMode === 'signin' ? 'Signing in...' : 'Creating account...';
-  if (authMode === 'signup') {
-    const { data, error } = await sb.auth.signUp({ email, password });
-    btn.disabled = false; btn.textContent = 'Sign Up';
-    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
-    if (!data.session) {
-      infoEl.textContent = 'Account created! You can sign in now.';
-      infoEl.style.display = 'block';
-      setAuthMode('signin');
-    }
-  } else {
-    const { error } = await sb.auth.signInWithPassword({ email, password, options: { persistSession: remember } });
-    btn.disabled = false; btn.textContent = 'Sign In';
-    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; }
+function togglePw(){const pw=document.getElementById('auth-password');const eye=document.getElementById('pw-eye');pw.type=pw.type==='password'?'text':'password';eye.innerHTML=pw.type==='text'?'&#128584;':'&#128065;';}
+async function handleAuth(){
+  const email=document.getElementById('auth-email').value.trim();
+  const password=document.getElementById('auth-password').value;
+  const remember=document.getElementById('remember-me').checked;
+  const errEl=document.getElementById('auth-err');const infoEl=document.getElementById('auth-info');const btn=document.getElementById('auth-btn');
+  errEl.style.display='none';infoEl.style.display='none';
+  if(!email||!password){errEl.textContent='Please enter your email and password.';errEl.style.display='block';return;}
+  btn.disabled=true;btn.textContent=authMode==='signin'?'Signing in...':'Creating account...';
+  if(authMode==='signup'){
+    const{data,error}=await sb.auth.signUp({email,password});
+    btn.disabled=false;btn.textContent='Sign Up';
+    if(error){errEl.textContent=error.message;errEl.style.display='block';return;}
+    if(!data.session){infoEl.textContent='Account created! You can sign in now.';infoEl.style.display='block';setAuthMode('signin');}
+  }else{
+    const{error}=await sb.auth.signInWithPassword({email,password,options:{persistSession:remember}});
+    btn.disabled=false;btn.textContent='Sign In';
+    if(error){errEl.textContent=error.message;errEl.style.display='block';}
   }
 }
-
-async function sendReset() {
-  const email = document.getElementById('auth-email').value.trim();
-  const errEl = document.getElementById('auth-err');
-  const infoEl = document.getElementById('auth-info');
-  if (!email) { errEl.textContent = 'Enter your email above first.'; errEl.style.display = 'block'; return; }
-  await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
-  infoEl.textContent = 'Password reset email sent! Check your inbox.';
-  infoEl.style.display = 'block';
+async function sendReset(){
+  const email=document.getElementById('auth-email').value.trim();
+  const errEl=document.getElementById('auth-err');const infoEl=document.getElementById('auth-info');
+  if(!email){errEl.textContent='Enter your email above first.';errEl.style.display='block';return;}
+  await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
+  infoEl.textContent='Password reset email sent!';infoEl.style.display='block';
+}
+async function signOut(){await sb.auth.signOut();}
+function showAuthScreen(){document.getElementById('loading-screen').style.display='none';document.getElementById('main-app').style.display='none';document.getElementById('auth-screen').style.display='flex';}
+async function showApp(){
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('user-email-lbl').textContent=currentUser.email;
+  setupDate();await loadData();renderAll();renderQuickPrompts();
+  if(!document.getElementById('ai-messages').children.length)
+    appendMsg(trackers.length?"Hey! I can see your tracker data. What do you want to work on today?":"Hey! Welcome to FitCoach AI. Create your first tracker to get started!",false);
 }
 
-async function signOut() { await sb.auth.signOut(); }
-
-function showAuthScreen() {
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-}
-
-async function showApp() {
-  document.getElementById('loading-screen').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'block';
-  document.getElementById('user-email-lbl').textContent = currentUser.email;
-  setupDate();
-  await loadData();
-  renderAll();
-  renderQuickPrompts();
-  if (!document.getElementById('ai-messages').children.length) {
-    appendMsg(trackers.length ? "Hey! I can see your tracker data. What do you want to work on today?" : "Hey! Welcome to FitCoach AI. Create your first tracker in the Trackers tab to get started!", false);
-  }
-}
-
-async function loadData() {
-  const [{ data: tData }, { data: lData }] = await Promise.all([
+// DATA
+async function loadData(){
+  const[{data:tData},{data:lData},{data:rData}]=await Promise.all([
     sb.from('trackers').select('*').order('created_at'),
-    sb.from('logs').select('*').order('date')
+    sb.from('logs').select('*').order('date'),
+    sb.from('rest_days').select('*').catch(()=>({data:[]}))
   ]);
-  trackers = (tData||[]).map(t=>({id:t.id,name:t.name,cat:t.cat,unit:t.unit,target:t.target,deadline:t.deadline,dir:t.dir||'up'}));
-  logs = (lData||[]).map(l=>({id:l.id,tid:l.tracker_id,val:l.val,note:l.note||'',date:l.date}));
+  trackers=(tData||[]).map(t=>({id:t.id,name:t.name,cat:t.cat,unit:t.unit,target:t.target,deadline:t.deadline,dir:t.dir||'up',logtype:t.logtype||'latest'}));
+  logs=(lData||[]).map(l=>({id:l.id,tid:l.tracker_id,val:l.val,note:l.note||'',date:l.date}));
+  restDays=(rData||[]).map(r=>r.date);
 }
-
-function showToast(msg) {
-  const t = document.getElementById('save-toast');
-  t.textContent = msg || 'Saved';
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 1800);
-}
+function showToast(msg){const t=document.getElementById('save-toast');t.textContent=msg||'Saved';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
 
 // DATE
-function setupDate() {
+function setupDate(){
   const d=new Date();
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   document.getElementById('date-pill').textContent=days[d.getDay()]+', '+months[d.getMonth()]+' '+d.getDate();
   document.getElementById('log-date').value=todayStr();
+  updateRestDayBtn();
 }
 function todayStr(){return new Date().toISOString().slice(0,10);}
 function daysUntil(ds){if(!ds)return null;return Math.ceil((new Date(ds)-new Date(todayStr()))/86400000);}
 function formatDeadline(ds){const d=daysUntil(ds);if(d===null)return '';if(d<0)return 'Deadline passed';if(d===0)return 'Due today!';if(d===1)return '1 day left';return d+' days left';}
 
 const CAT_COLORS={Strength:{bg:'#dbeafe',text:'#1e40af'},Cardio:{bg:'#d1fae5',text:'#065f46'},Basketball:{bg:'#fef3c7',text:'#92400e'},Nutrition:{bg:'#dcfce7',text:'#166534'},Sleep:{bg:'#ede9fe',text:'#4c1d95'},Recovery:{bg:'#fee2e2',text:'#991b1b'},Custom:{bg:'#f3f4f6',text:'#374151'}};
+function getCatColor(cat){return CAT_COLORS[cat]||{bg:'#f0faf6',text:'#0f6e56'};}
 
-// STREAKS
+// REST DAYS
+async function toggleRestDay(){
+  const today=todayStr();
+  const isRest=restDays.includes(today);
+  if(isRest){
+    await sb.from('rest_days').delete().eq('date',today).eq('user_id',currentUser.id);
+    restDays=restDays.filter(d=>d!==today);
+    showToast('Rest day removed');
+  }else{
+    await sb.from('rest_days').insert({user_id:currentUser.id,date:today}).catch(()=>{});
+    restDays.push(today);
+    showToast('Rest day logged!');
+  }
+  updateRestDayBtn();renderStreakBanner();
+}
+function updateRestDayBtn(){
+  const btn=document.getElementById('rest-day-btn');if(!btn)return;
+  const isRest=restDays.includes(todayStr());
+  btn.className='rest-btn'+(isRest?' active':'');
+  btn.innerHTML=isRest?'&#128564; Rest day (today)':'&#128564; Rest day';
+}
+
+// STREAKS — rest days count toward streak
 function calcStreak(){
-  if(!logs.length)return 0;
-  const dates=[...new Set(logs.map(l=>l.date))].sort((a,b)=>b.localeCompare(a));
+  if(!logs.length&&!restDays.length)return 0;
+  const allDates=[...new Set([...logs.map(l=>l.date),...restDays])].sort((a,b)=>b.localeCompare(a));
   let s=0,check=todayStr();
-  if(dates[0]!==check){const yd=new Date();yd.setDate(yd.getDate()-1);const ys=yd.toISOString().slice(0,10);if(dates[0]!==ys)return 0;check=ys;}
-  for(const date of dates){if(date===check){s++;const p=new Date(check);p.setDate(p.getDate()-1);check=p.toISOString().slice(0,10);}else break;}
+  if(allDates[0]!==check){const yd=new Date();yd.setDate(yd.getDate()-1);const ys=yd.toISOString().slice(0,10);if(allDates[0]!==ys)return 0;check=ys;}
+  for(const date of allDates){if(date===check){s++;const p=new Date(check);p.setDate(p.getDate()-1);check=p.toISOString().slice(0,10);}else break;}
   return s;
 }
 function calcTrackerStreak(tid){
@@ -447,6 +487,31 @@ function calcTrackerStreak(tid){
   for(const d of dates){if(d===check){s++;const p=new Date(check);p.setDate(p.getDate()-1);check=p.toISOString().slice(0,10);}else break;}
   return s;
 }
+
+// PR detection
+function getTrackerPR(tid){
+  const t=trackers.find(x=>x.id===tid);if(!t)return null;
+  const vals=logs.filter(l=>l.tid===tid).map(l=>l.val);
+  if(!vals.length)return null;
+  return t.dir==='up'?Math.max(...vals):Math.min(...vals);
+}
+function isNewPR(tid,val){
+  const t=trackers.find(x=>x.id===tid);if(!t)return false;
+  const existing=logs.filter(l=>l.tid===tid).map(l=>l.val);
+  if(!existing.length)return true;
+  return t.dir==='up'?val>Math.max(...existing):val<Math.min(...existing);
+}
+
+// Display value — latest or cumulative today
+function getDisplayVal(t){
+  const todayLogs=logs.filter(l=>l.tid===t.id&&l.date===todayStr());
+  if(t.logtype==='cumulative'){
+    return todayLogs.length?todayLogs.reduce((a,b)=>a+b.val,0):null;
+  }
+  const all=logs.filter(l=>l.tid===t.id).sort((a,b)=>a.date.localeCompare(b.date));
+  return all.length?all[all.length-1].val:null;
+}
+
 function getLatest(tid){const e=logs.filter(l=>l.tid===tid).sort((a,b)=>a.date.localeCompare(b.date));return e.length?e[e.length-1]:null;}
 
 // RENDER
@@ -459,20 +524,30 @@ function renderStreakBanner(){
 function renderMetrics(){
   const g=document.getElementById('metrics-grid');g.innerHTML='';if(!trackers.length)return;
   trackers.forEach(t=>{
-    const latest=getLatest(t.id);const val=latest?latest.val:null;const c=CAT_COLORS[t.cat]||CAT_COLORS.Custom;
+    const val=getDisplayVal(t);
+    const pr=getTrackerPR(t.id);
+    const isPR=val!==null&&pr!==null&&val===pr&&logs.filter(l=>l.tid===t.id).length>0;
+    const c=getCatColor(t.cat);
     let delta='';
     if(t.target&&val!=null){const diff=t.dir==='up'?(val-t.target):(t.target-val);delta=diff>=0?'<div class="metric-target delta-up">On target</div>':'<div class="metric-target delta-down">'+Math.abs(diff).toFixed(1)+' '+t.unit+' to go</div>';}
     const tgt=t.target?'<div class="metric-target">Target: '+t.target+' '+t.unit+'</div>':'<div class="metric-target" style="color:#bbb">No target</div>';
     const dl=t.deadline?'<div class="metric-deadline">'+formatDeadline(t.deadline)+'</div>':'';
     const streak=calcTrackerStreak(t.id);const sb2=streak>=2?'<div class="metric-streak">'+streak+' day streak</div>':'';
-    g.innerHTML+='<div class="metric-card" onclick="openTargetEdit(\''+t.id+'\')" title="Click to edit target"><div class="metric-label"><span class="metric-dot" style="background:'+c.text+'"></span>'+t.name+'</div><div class="metric-value">'+(val!=null?val:'&mdash;')+' <span class="metric-unit">'+t.unit+'</span></div>'+tgt+(delta||'')+dl+sb2+'</div>';
+    const prBadge=isPR?'<div class="pr-badge">&#127942; PR</div>':'';
+    const cardClass='metric-card'+(isPR?' pr-card':'');
+    const cumulLabel=t.logtype==='cumulative'?'<div style="font-size:10px;color:var(--text-muted);margin-top:2px">today\'s total</div>':'';
+    g.innerHTML+='<div class="'+cardClass+'" onclick="openTargetEdit(\''+t.id+'\')" title="Click to edit target"><div class="metric-label"><span class="metric-dot" style="background:'+c.text+'"></span>'+t.name+'</div><div class="metric-value">'+(val!=null?val:'&mdash;')+' <span class="metric-unit">'+t.unit+'</span></div>'+cumulLabel+tgt+(delta||'')+dl+sb2+prBadge+'</div>';
   });
 }
 
 function renderTrackersList(){
   const el=document.getElementById('trackers-list');
   if(!trackers.length){el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--text-light);font-size:13px"><div style="font-size:2rem;margin-bottom:8px">&#9881;&#65039;</div><strong style="display:block;margin-bottom:6px;color:#888">No trackers yet</strong>Hit the button above to create your first one.</div>';return;}
-  el.innerHTML=trackers.map(t=>{const c=CAT_COLORS[t.cat]||CAT_COLORS.Custom;const dl=t.deadline?'<div style="font-size:11px;color:var(--purple);margin-top:2px">'+formatDeadline(t.deadline)+'</div>':'';return '<div class="tracker-item"><div><div class="tracker-name">'+t.name+'</div><div class="tracker-cat">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target:'')+'</div>'+dl+'</div><div style="display:flex;align-items:center;gap:8px"><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span><button class="edit-btn" onclick="openEditTracker(\''+t.id+'\')">Edit</button><button class="del-btn" onclick="deleteTracker(\''+t.id+'\')">&#128465;</button></div></div>';}).join('');
+  el.innerHTML=trackers.map(t=>{
+    const c=getCatColor(t.cat);const dl=t.deadline?'<div style="font-size:11px;color:var(--purple);margin-top:2px">'+formatDeadline(t.deadline)+'</div>':'';
+    const lt=t.logtype==='cumulative'?'<span style="font-size:10px;background:#f0faf6;color:var(--green);border-radius:4px;padding:1px 5px;margin-left:4px">daily total</span>':'';
+    return '<div class="tracker-item"><div><div class="tracker-name">'+t.name+lt+'</div><div class="tracker-cat">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target:'')+'</div>'+dl+'</div><div style="display:flex;align-items:center;gap:8px"><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span><button class="edit-btn" onclick="openEditTracker(\''+t.id+'\')">Edit</button><button class="del-btn" onclick="deleteTracker(\''+t.id+'\')">&#128465;</button></div></div>';
+  }).join('');
 }
 
 function renderLog(){
@@ -492,20 +567,39 @@ async function addLog(){
   const note=document.getElementById('log-note').value.trim();
   const date=document.getElementById('log-date').value||todayStr();
   if(!tid||isNaN(val))return;
+  const wasPR=isNewPR(tid,val);
   const btn=document.getElementById('log-btn');btn.disabled=true;btn.textContent='Saving...';
   const{data,error}=await sb.from('logs').insert({user_id:currentUser.id,tracker_id:tid,val,note,date}).select().single();
   btn.disabled=false;btn.textContent='+ Log entry';
   if(error){alert('Error: '+error.message);return;}
   logs.push({id:data.id,tid:data.tracker_id,val:data.val,note:data.note||'',date:data.date});
   document.getElementById('log-val').value='';document.getElementById('log-note').value='';document.getElementById('log-date').value=todayStr();
-  showToast('Entry logged!');renderAll();
+  showToast(wasPR?'New PR! ' : 'Entry logged!');
+  renderAll();
 }
 
 function renderRecentEntries(){
   const el=document.getElementById('recent-entries');if(!el)return;
-  const sorted=[...logs].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).slice(0,20);
+  const sorted=[...logs].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
   if(!sorted.length){el.innerHTML='<div class="no-data">No entries yet. Log something above!</div>';return;}
-  el.innerHTML=sorted.map(l=>{const t=trackers.find(x=>x.id===l.tid);if(!t)return '';const c=CAT_COLORS[t.cat]||CAT_COLORS.Custom;return '<div class="entry-item"><div style="flex:1"><div class="entry-name">'+t.name+(l.note?' <span style="font-weight:400;color:#888">&mdash; '+l.note+'</span>':'')+'</div><div class="entry-meta">'+l.date+' &middot; '+t.cat+'</div></div><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+l.val+' '+t.unit+'</span><button class="del-btn" style="margin-left:8px" onclick="deleteLog(\''+l.id+'\')" title="Delete">&#128465;</button></div>';}).join('');
+  // Group by date
+  const groups={};
+  sorted.forEach(l=>{if(!groups[l.date])groups[l.date]=[];groups[l.date].push(l);});
+  const dates=Object.keys(groups).slice(0,10);
+  el.innerHTML=dates.map(date=>{
+    const items=groups[date];
+    const isRest=restDays.includes(date);
+    const itemsHtml=items.map(l=>{
+      const t=trackers.find(x=>x.id===l.tid);if(!t)return '';
+      const c=getCatColor(t.cat);
+      const pr=getTrackerPR(t.id);
+      const isPR=t.dir==='up'?l.val>=pr:l.val<=pr;
+      const prTag=isPR&&logs.filter(x=>x.tid===t.id).length>1?'<span class="pr-badge" style="margin-left:6px">&#127942; PR</span>':'';
+      return '<div class="entry-item'+(isPR?' pr-entry':'')+'"><div style="flex:1"><div class="entry-name">'+t.name+(l.note?' <span style="font-weight:400;color:#888">&mdash; '+l.note+'</span>':'')+'</div></div><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+l.val+' '+t.unit+'</span>'+prTag+'<button class="del-btn" style="margin-left:8px" onclick="deleteLog(\''+l.id+'\')" title="Delete">&#128465;</button></div>';
+    }).join('');
+    const restTag=isRest?'<span style="font-size:11px;background:#fff8f0;color:#92400e;border-radius:4px;padding:2px 6px;margin-left:8px">rest day</span>':'';
+    return '<div class="day-group"><div class="day-group-title">'+date+restTag+'</div>'+itemsHtml+'</div>';
+  }).join('');
 }
 
 async function deleteLog(id){
@@ -513,6 +607,28 @@ async function deleteLog(id){
   const{error}=await sb.from('logs').delete().eq('id',id);
   if(error){alert('Error: '+error.message);return;}
   logs=logs.filter(l=>l.id!==id);showToast('Entry deleted');renderAll();
+}
+
+// TO-DO TAB
+function renderTodo(){
+  const el=document.getElementById('todo-content');
+  if(!trackers.length){el.innerHTML='<div class="card empty-state"><div class="icon">&#9989;</div><h3>No trackers yet</h3><p>Create trackers to see your daily to-do list.</p></div>';return;}
+  const today=todayStr();
+  const loggedToday=new Set(logs.filter(l=>l.date===today).map(l=>l.tid));
+  const notLogged=trackers.filter(t=>!loggedToday.has(t.id));
+  const isRestDay=restDays.includes(today);
+  if(isRestDay){el.innerHTML='<div class="card" style="text-align:center;padding:2rem"><div style="font-size:2rem;margin-bottom:8px">&#128564;</div><div style="font-weight:700;margin-bottom:4px">Rest day!</div><div style="font-size:13px;color:var(--text-muted)">Enjoy your recovery. See you tomorrow!</div></div>';return;}
+  if(!notLogged.length){el.innerHTML='<div class="card" style="text-align:center;padding:2rem"><div style="font-size:2rem;margin-bottom:8px">&#127881;</div><div style="font-weight:700;margin-bottom:4px">All done for today!</div><div style="font-size:13px;color:var(--text-muted)">Every tracker has been logged. Great work!</div></div>';return;}
+  el.innerHTML='<div class="card" style="padding:0.75rem 1.25rem">'+notLogged.map(t=>{
+    const c=getCatColor(t.cat);
+    return '<div class="todo-item"><span class="todo-dot" style="background:'+c.text+'"></span><div style="flex:1"><div style="font-size:13px;font-weight:600">'+t.name+'</div><div style="font-size:12px;color:var(--text-muted)">'+t.cat+' &middot; '+t.unit+'</div></div><button class="ghost-btn" style="font-size:12px;padding:5px 10px" onclick="quickLog(\''+t.id+'\')">Log now</button></div>';
+  }).join('')+'</div>';
+}
+function quickLog(tid){
+  switchTab('log',document.querySelectorAll('.nav-btn')[0]);
+  document.getElementById('log-tracker').value=tid;
+  updateLogFields();
+  document.getElementById('log-val').focus();
 }
 
 // SUMMARY
@@ -527,7 +643,7 @@ function renderSummary(){
   let html='<div class="sec-title">This week</div><div class="summary-grid">';
   html+='<div class="summary-stat"><div class="summary-stat-val">'+tw.length+'</div><div class="summary-stat-lbl">Entries logged</div></div>';
   html+='<div class="summary-stat"><div class="summary-stat-val">'+[...new Set(tw.map(l=>l.date))].length+'</div><div class="summary-stat-lbl">Active days</div></div>';
-  html+='<div class="summary-stat"><div class="summary-stat-val">'+(streak||0)+'</div><div class="summary-stat-lbl">Day streak</div></div>';
+  html+='<div class="summary-stat"><div class="summary-stat-val">'+(streak||0)+'</div><div class="summary-stat-lbl">Day streak &#128293;</div></div>';
   html+='<div class="summary-stat"><div class="summary-stat-val">'+[...new Set(tw.map(l=>l.tid))].length+'</div><div class="summary-stat-lbl">Trackers used</div></div>';
   html+='</div><div class="sec-title" style="margin-top:4px">Tracker breakdown</div><div class="card" style="padding:0.75rem 1.25rem">';
   let any=false;
@@ -536,21 +652,22 @@ function renderSummary(){
     if(!twt.length&&!lwt.length)return;any=true;
     const twAvg=twt.length?twt.reduce((a,b)=>a+b.val,0)/twt.length:null;
     const lwAvg=lwt.length?lwt.reduce((a,b)=>a+b.val,0)/lwt.length:null;
-    const latest=getLatest(t.id);
+    const latest=getLatest(t.id);const pr=getTrackerPR(t.id);
     let ch='';
-    if(twAvg!==null&&lwAvg!==null){const diff=twAvg-lwAvg,pct=((diff/lwAvg)*100).toFixed(1);const good=(t.dir==='up'&&diff>=0)||(t.dir==='down'&&diff<=0);ch='<span style="font-size:12px;font-weight:600;color:'+(good?'var(--green)':'var(--orange)')+'\">'+(diff>=0?'up':'down')+' '+Math.abs(pct)+'% vs last week</span>';}
+    if(twAvg!==null&&lwAvg!==null){const diff=twAvg-lwAvg,pct=((diff/lwAvg)*100).toFixed(1);const good=(t.dir==='up'&&diff>=0)||(t.dir==='down'&&diff<=0);ch='<span style="font-size:12px;font-weight:600;color:'+(good?'var(--green)':'var(--orange)')+'\">'+(diff>=0?'&#8593;':'&#8595;')+' '+Math.abs(pct)+'% vs last week</span>';}
     else if(twAvg!==null)ch='<span style="font-size:12px;color:var(--text-muted)">No data last week</span>';
     let prog='';
     if(t.target&&latest){const pct=Math.max(0,Math.min(100,t.dir==='up'?(latest.val/t.target)*100:((2*t.target-latest.val)/t.target)*100)).toFixed(0);prog='<div style="margin-top:6px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:3px"><span>Goal progress</span><span>'+pct+'%</span></div><div class="prog-bar-wrap"><div class="prog-bar" style="width:'+pct+'%"></div></div></div>';if(t.deadline)prog+='<div style="font-size:11px;color:var(--purple);margin-top:4px">'+formatDeadline(t.deadline)+'</div>';}
-    const c=CAT_COLORS[t.cat]||CAT_COLORS.Custom;
-    html+='<div class="tracker-summary-row"><div style="flex:1"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="font-size:13px;font-weight:600">'+t.name+'</span><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span></div><div style="font-size:12px;color:var(--text-muted)">'+twt.length+' entr'+(twt.length===1?'y':'ies')+' this week'+(twAvg!==null?' &middot; avg '+twAvg.toFixed(1)+' '+t.unit:'')+'</div>'+(ch?'<div style="margin-top:3px">'+ch+'</div>':'')+prog+'</div></div>';
+    const prHtml=pr!==null?'<span style="font-size:11px;color:var(--gold);font-weight:600;margin-left:6px">&#127942; PR: '+pr+' '+t.unit+'</span>':'';
+    const c=getCatColor(t.cat);
+    html+='<div class="tracker-summary-row"><div style="flex:1"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600">'+t.name+'</span><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span>'+prHtml+'</div><div style="font-size:12px;color:var(--text-muted)">'+twt.length+' entr'+(twt.length===1?'y':'ies')+' this week'+(twAvg!==null?' &middot; avg '+twAvg.toFixed(1)+' '+t.unit:'')+'</div>'+(ch?'<div style="margin-top:3px">'+ch+'</div>':'')+prog+'</div></div>';
   });
   if(!any)html+='<div class="no-data">No entries logged in the past two weeks.</div>';
   html+='</div>';el.innerHTML=html;
 }
 
 // GRAPHS
-let activeChart=null,activeChartInst=null;
+let activeChart=null,activeChartInst=null,activeTimeRange='week';
 function renderChartTabs(){
   const has=trackers.length>0;
   document.getElementById('graphs-empty').style.display=has?'none':'block';
@@ -558,29 +675,90 @@ function renderChartTabs(){
   if(!has)return;
   document.getElementById('chart-tabs').innerHTML=trackers.map(t=>'<button class="chart-tab'+(t.id===activeChart?' active':'')+'" onclick="showChart(\''+t.id+'\')">'+t.name+'</button>').join('');
 }
+function setTimeRange(range,btn){
+  activeTimeRange=range;
+  document.querySelectorAll('.time-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(activeChart)showChart(activeChart);
+}
+function filterByRange(entries,range){
+  const today=new Date(todayStr());
+  const cutoff=new Date(today);
+  if(range==='week')cutoff.setDate(cutoff.getDate()-6);
+  else if(range==='month')cutoff.setDate(cutoff.getDate()-29);
+  else if(range==='year')cutoff.setFullYear(cutoff.getFullYear()-1);
+  else return entries;
+  return entries.filter(e=>new Date(e.date)>=cutoff);
+}
+function aggregateWeekly(entries){
+  const weeks={};
+  entries.forEach(e=>{const d=new Date(e.date);const day=d.getDay();const monday=new Date(d);monday.setDate(d.getDate()-(day===0?6:day-1));const key=monday.toISOString().slice(0,10);if(!weeks[key])weeks[key]=[];weeks[key].push(e.val);});
+  return Object.entries(weeks).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,vals])=>({label:k.slice(5),val:vals.reduce((a,b)=>a+b,0)/vals.length}));
+}
 function showChart(tid){
   activeChart=tid;renderChartTabs();
   const t=trackers.find(x=>x.id===tid);
-  const entries=logs.filter(l=>l.tid===tid).sort((a,b)=>a.date.localeCompare(b.date));
+  const allEntries=logs.filter(l=>l.tid===tid).sort((a,b)=>a.date.localeCompare(b.date));
+  const entries=filterByRange(allEntries,activeTimeRange);
   const card=document.getElementById('chart-card');
-  if(!entries.length){card.innerHTML='<div class="no-data"><strong>No data for '+t.name+' yet</strong>Log some entries first.</div>';return;}
-  card.innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:2px">'+t.name+'</div><div style="font-size:12px;color:#888;margin-bottom:1rem">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target+' '+t.unit:'')+(t.deadline?' &middot; '+formatDeadline(t.deadline):'')+'</div><div style="position:relative;width:100%;height:220px"><canvas id="prog-chart"></canvas></div>';
+  if(!entries.length){card.innerHTML='<div class="no-data"><strong>No data for this time range</strong>Try selecting a wider range or log some entries.</div>';return;}
+  // For year/all use weekly averages
+  const useWeekly=activeTimeRange==='year'||activeTimeRange==='all';
+  const points=useWeekly?aggregateWeekly(entries):entries.map(e=>({label:e.date.slice(5),val:e.val}));
+  // 7-day moving average for week/month
+  let maData=null;
+  if(!useWeekly&&points.length>=3){
+    maData=points.map((_,i)=>{const window=points.slice(Math.max(0,i-2),i+1);return window.reduce((a,b)=>a+b.val,0)/window.length;});
+  }
+  card.innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:2px">'+t.name+'</div><div style="font-size:12px;color:#888;margin-bottom:1rem">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target+' '+t.unit:'')+(t.deadline?' &middot; '+formatDeadline(t.deadline):'')+(useWeekly?' &middot; weekly avg':'')+'</div><div style="position:relative;width:100%;height:240px"><canvas id="prog-chart"></canvas></div>';
   if(activeChartInst)activeChartInst.destroy();
-  const cfg={type:'line',data:{labels:entries.map(e=>e.date.slice(5)),datasets:[{label:t.name,data:entries.map(e=>e.val),borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',borderWidth:2.5,pointBackgroundColor:'#1D9E75',pointRadius:5,pointHoverRadius:7,fill:true,tension:0.35}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y+' '+t.unit}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#aaa',font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#aaa',font:{size:11},callback:v=>v+' '+t.unit}}}}};
-  if(t.target)cfg.data.datasets.push({label:'Target',data:Array(entries.length).fill(t.target),borderColor:'#D85A30',borderDash:[5,5],borderWidth:1.5,pointRadius:0,fill:false});
+  const datasets=[{label:t.name,data:points.map(p=>p.val),borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',borderWidth:2.5,pointBackgroundColor:'#1D9E75',pointRadius:4,pointHoverRadius:6,fill:true,tension:0.35}];
+  if(maData)datasets.push({label:'Trend',data:maData,borderColor:'rgba(29,158,117,0.4)',borderDash:[4,4],borderWidth:1.5,pointRadius:0,fill:false,tension:0.35});
+  if(t.target)datasets.push({label:'Target',data:Array(points.length).fill(t.target),borderColor:'#D85A30',borderDash:[5,5],borderWidth:1.5,pointRadius:0,fill:false});
+  const cfg={type:'line',data:{labels:points.map(p=>p.label),datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:maData!==null,labels:{font:{size:11},boxWidth:20}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toFixed(1)+' '+t.unit}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#aaa',font:{size:10},maxTicksLimit:8}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#aaa',font:{size:11},callback:v=>v+' '+t.unit}}}}};
   activeChartInst=new Chart(document.getElementById('prog-chart'),cfg);
 }
 
 // TRACKER CRUD
+function toggleCustomCat(){
+  const val=document.getElementById('t-cat').value;
+  document.getElementById('custom-cat-wrap').style.display=val==='Custom'?'block':'none';
+}
 let editingTrackerId=null;
-function openAddTracker(){editingTrackerId=null;document.getElementById('modal-title').textContent='New tracker';document.getElementById('modal-save-btn').textContent='Save';['t-name','t-unit','t-target','t-deadline'].forEach(id=>document.getElementById(id).value='');document.getElementById('t-cat').value='Strength';document.getElementById('t-dir').value='up';document.getElementById('tracker-modal').classList.add('open');}
-function openEditTracker(id){editingTrackerId=id;const t=trackers.find(x=>x.id===id);document.getElementById('modal-title').textContent='Edit tracker';document.getElementById('modal-save-btn').textContent='Update';document.getElementById('t-name').value=t.name;document.getElementById('t-cat').value=t.cat;document.getElementById('t-unit').value=t.unit;document.getElementById('t-target').value=t.target||'';document.getElementById('t-deadline').value=t.deadline||'';document.getElementById('t-dir').value=t.dir||'up';document.getElementById('tracker-modal').classList.add('open');}
+function openAddTracker(){
+  editingTrackerId=null;
+  document.getElementById('modal-title').textContent='New tracker';
+  document.getElementById('modal-save-btn').textContent='Save';
+  ['t-name','t-unit','t-target','t-deadline','t-cat-custom'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('t-cat').value='Strength';
+  document.getElementById('t-dir').value='up';
+  document.getElementById('t-logtype').value='latest';
+  document.getElementById('custom-cat-wrap').style.display='none';
+  document.getElementById('tracker-modal').classList.add('open');
+}
+function openEditTracker(id){
+  editingTrackerId=id;const t=trackers.find(x=>x.id===id);
+  document.getElementById('modal-title').textContent='Edit tracker';
+  document.getElementById('modal-save-btn').textContent='Update';
+  document.getElementById('t-name').value=t.name;
+  const builtins=['Strength','Cardio','Basketball','Nutrition','Sleep','Recovery'];
+  if(builtins.includes(t.cat)){document.getElementById('t-cat').value=t.cat;document.getElementById('custom-cat-wrap').style.display='none';}
+  else{document.getElementById('t-cat').value='Custom';document.getElementById('t-cat-custom').value=t.cat;document.getElementById('custom-cat-wrap').style.display='block';}
+  document.getElementById('t-unit').value=t.unit;
+  document.getElementById('t-target').value=t.target||'';
+  document.getElementById('t-deadline').value=t.deadline||'';
+  document.getElementById('t-dir').value=t.dir||'up';
+  document.getElementById('t-logtype').value=t.logtype||'latest';
+  document.getElementById('tracker-modal').classList.add('open');
+}
 function closeModal(){document.getElementById('tracker-modal').classList.remove('open');}
 async function saveTracker(){
   const name=document.getElementById('t-name').value.trim();const unit=document.getElementById('t-unit').value.trim();
   if(!name||!unit){alert('Please fill in a name and unit.');return;}
+  const catSel=document.getElementById('t-cat').value;
+  const cat=catSel==='Custom'?(document.getElementById('t-cat-custom').value.trim()||'Custom'):catSel;
   const tgt=document.getElementById('t-target').value;const dl=document.getElementById('t-deadline').value;
-  const obj={name,cat:document.getElementById('t-cat').value,unit,target:tgt?parseFloat(tgt):null,deadline:dl||null,dir:document.getElementById('t-dir').value};
+  const obj={name,cat,unit,target:tgt?parseFloat(tgt):null,deadline:dl||null,dir:document.getElementById('t-dir').value,logtype:document.getElementById('t-logtype').value};
   document.getElementById('modal-save-btn').disabled=true;
   if(editingTrackerId){
     const{error}=await sb.from('trackers').update(obj).eq('id',editingTrackerId);
@@ -600,7 +778,6 @@ async function deleteTracker(id){
   trackers=trackers.filter(x=>x.id!==id);logs=logs.filter(l=>l.tid!==id);
   if(activeChart===id)activeChart=null;showToast('Tracker deleted');renderAll();
 }
-
 let editingTargetId=null;
 function openTargetEdit(tid){editingTargetId=tid;const t=trackers.find(x=>x.id===tid);document.getElementById('tgt-modal-title').textContent='Edit target - '+t.name;document.getElementById('tgt-unit-label').textContent='Target ('+t.unit+')';document.getElementById('tgt-val').value=t.target||'';document.getElementById('tgt-deadline').value=t.deadline||'';document.getElementById('tgt-dir').value=t.dir||'up';document.getElementById('target-modal').classList.add('open');}
 function closeTargetModal(){document.getElementById('target-modal').classList.remove('open');}
@@ -619,16 +796,23 @@ function switchTab(tab,btn){
   document.getElementById('tab-'+tab).classList.add('active');btn.classList.add('active');
   if(tab==='graphs'){renderChartTabs();if(activeChart)showChart(activeChart);}
   if(tab==='summary')renderSummary();
+  if(tab==='todo')renderTodo();
 }
 
-function renderAll(){renderStreakBanner();renderMetrics();renderTrackersList();renderLog();renderRecentEntries();renderChartTabs();}
+function renderAll(){renderStreakBanner();renderMetrics();renderTrackersList();renderLog();renderRecentEntries();renderChartTabs();updateRestDayBtn();}
 
 // AI COACH
 const sysPrompt='You are FitCoach AI, an energetic personal fitness coach. Be concise (2-4 sentences), specific, and motivating.';
 function buildCtx(){
   if(!trackers.length)return 'No trackers set up yet.';
   const s=calcStreak();let ctx='Overall streak: '+s+' day'+(s!==1?'s':'')+'\n';
-  trackers.forEach(t=>{const entries=logs.filter(l=>l.tid===t.id).sort((a,b)=>a.date.localeCompare(b.date));const latest=entries.length?entries[entries.length-1]:null;const ts=calcTrackerStreak(t.id);ctx+='- '+t.name+' ('+t.cat+', '+t.unit+(t.target?', target: '+t.target:'')+(t.deadline?', deadline: '+formatDeadline(t.deadline):'')+'): '+(latest?latest.val+' '+t.unit+' on '+latest.date:'no data')+(ts>=2?', '+ts+'-day streak':'')+'\n';if(entries.length>1)ctx+='  history: '+entries.slice(-5).map(e=>e.val+' ('+e.date+')').join(', ')+'\n';});
+  trackers.forEach(t=>{
+    const entries=logs.filter(l=>l.tid===t.id).sort((a,b)=>a.date.localeCompare(b.date));
+    const latest=entries.length?entries[entries.length-1]:null;
+    const ts=calcTrackerStreak(t.id);const pr=getTrackerPR(t.id);
+    ctx+='- '+t.name+' ('+t.cat+', '+t.unit+(t.target?', target: '+t.target:'')+(t.deadline?', deadline: '+formatDeadline(t.deadline):'')+(pr!==null?', PR: '+pr:'')+'): '+(latest?latest.val+' '+t.unit+' on '+latest.date:'no data')+(ts>=2?', '+ts+'-day streak':'')+'\n';
+    if(entries.length>1)ctx+='  history: '+entries.slice(-5).map(e=>e.val+' ('+e.date+')').join(', ')+'\n';
+  });
   return ctx;
 }
 let chatHistory=[];
@@ -639,10 +823,10 @@ function appendTyping(){const d=document.createElement('div');d.className='ai-ms
 async function callAI(msg){
   appendTyping();chatHistory.push({role:'user',content:msg});
   try{
-    const { data: { session } } = await sb.auth.getSession();
-    const token = session?.access_token || 'sb_publishable_ol_pvojRI22Z34_MYQouHQ_Lu7PbZ62';
+    const{data:{session}}=await sb.auth.getSession();
+    const token=session?.access_token||SUPABASE_KEY;
     const res=await fetch('https://ddferudzeppmvyljymbq.supabase.co/functions/v1/ai-coach',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({system:sysPrompt+'\n\n'+buildCtx(),messages:chatHistory})});
-    const data=await res.json();console.log('Edge function response:',JSON.stringify(data));const reply=data.reply||'Something went wrong.';
+    const data=await res.json();const reply=data.reply||'Something went wrong.';
     document.getElementById('typing-indicator').remove();appendMsg(reply,false);chatHistory.push({role:'assistant',content:reply});
   }catch(e){const el=document.getElementById('typing-indicator');if(el)el.remove();appendMsg('Connection error. Please try again.',false);chatHistory.pop();}
 }

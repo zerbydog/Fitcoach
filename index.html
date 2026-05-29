@@ -162,6 +162,26 @@ body.dark .rest-btn{color:#fde68a}
 .day-group{margin-bottom:14px}
 .day-group-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:flex;align-items:center;gap:8px}
 .custom-cat-wrap{display:none;margin-top:6px}
+
+.friend-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-soft)}
+.friend-item:last-child{border-bottom:none}
+.friend-avatar{width:34px;height:34px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0}
+.friend-email{font-size:13px;font-weight:600}
+.friend-sub{font-size:12px;color:var(--text-muted)}
+.notif-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--orange);margin-left:4px;vertical-align:middle}
+.challenge-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px}
+.challenge-card.active-challenge{border-color:var(--green)}
+.challenge-card.pending-challenge{border-color:var(--gold)}
+.challenge-vs{display:flex;align-items:center;gap:10px;margin:10px 0}
+.challenge-player{flex:1;text-align:center}
+.challenge-player-name{font-size:12px;color:var(--text-muted);margin-bottom:3px}
+.challenge-player-val{font-size:20px;font-weight:700}
+.challenge-player-delta{font-size:12px;margin-top:2px}
+.challenge-divider{font-size:18px;font-weight:700;color:var(--text-muted)}
+.challenge-bar-wrap{height:8px;background:var(--border);border-radius:99px;overflow:hidden;margin:8px 0;position:relative}
+.challenge-bar-you{height:8px;background:var(--green);border-radius:99px;position:absolute;left:0;top:0;transition:width .4s}
+.challenge-bar-them{height:8px;background:var(--orange);border-radius:99px;position:absolute;right:0;top:0;transition:width .4s}
+.tab-badge{background:var(--orange);color:white;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;margin-left:3px}
 </style>
 </head>
 <body>
@@ -224,6 +244,7 @@ body.dark .rest-btn{color:#fde68a}
   <button class="nav-btn" onclick="switchTab('summary',this)">&#128202; Summary</button>
   <button class="nav-btn" onclick="switchTab('graphs',this)">&#128200; Graphs</button>
   <button class="nav-btn" onclick="switchTab('trackers',this)">&#9881;&#65039; Trackers</button>
+  <button class="nav-btn" onclick="switchTab('friends',this)" id="friends-nav-btn">&#128101; Friends</button>
   <button class="nav-btn" onclick="switchTab('coach',this)">&#129302; Coach</button>
 </div>
 
@@ -285,6 +306,52 @@ body.dark .rest-btn{color:#fde68a}
     <button class="green-btn" onclick="openAddTracker()">+ New tracker</button>
   </div>
   <div class="card" style="padding:0;overflow:hidden"><div id="trackers-list"></div></div>
+</div>
+
+
+<!-- FRIENDS & CHALLENGES -->
+<div id="tab-friends" class="tab">
+
+  <!-- Pending challenges notification -->
+  <div id="pending-challenges-banner" style="display:none" class="card" style="background:rgba(245,158,11,0.1);border-color:var(--gold);margin-bottom:12px">
+    <div style="font-weight:700;font-size:13px;margin-bottom:8px">&#9888;&#65039; Challenge requests</div>
+    <div id="pending-challenges-list"></div>
+  </div>
+
+  <!-- Tabs inside friends -->
+  <div style="display:flex;gap:6px;margin-bottom:14px">
+    <button class="time-tab active" id="ftab-friends" onclick="setFriendsTab('friends',this)">Friends</button>
+    <button class="time-tab" id="ftab-challenges" onclick="setFriendsTab('challenges',this)">Challenges</button>
+  </div>
+
+  <!-- FRIENDS SUBTAB -->
+  <div id="fsub-friends">
+    <div class="card" style="padding:0.75rem 1.25rem;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Add a friend by email</div>
+      <div style="display:flex;gap:8px">
+        <input type="email" id="friend-email-input" placeholder="friend@email.com" style="flex:1;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;outline:none;font-family:inherit;background:var(--input-bg);color:var(--text)" onkeydown="if(event.key==='Enter')searchFriend()"/>
+        <button class="green-btn" onclick="searchFriend()" style="padding:8px 14px">Search</button>
+      </div>
+      <div id="friend-search-result" style="margin-top:10px"></div>
+    </div>
+
+    <div class="sec-title">Your friends</div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div id="friends-list"><div style="padding:1.5rem;text-align:center;color:var(--text-muted);font-size:13px">No friends yet. Search for someone above!</div></div>
+    </div>
+
+    <div id="pending-requests-section" style="display:none;margin-top:14px">
+      <div class="sec-title">Pending requests</div>
+      <div class="card" style="padding:0;overflow:hidden"><div id="pending-requests-list"></div></div>
+    </div>
+  </div>
+
+  <!-- CHALLENGES SUBTAB -->
+  <div id="fsub-challenges" style="display:none">
+    <button class="green-btn" onclick="openNewChallenge()" style="margin-bottom:14px">+ New challenge</button>
+    <div id="challenges-list"></div>
+  </div>
+
 </div>
 
 <!-- COACH -->
@@ -370,6 +437,55 @@ body.dark .rest-btn{color:#fde68a}
     <div class="modal-btns">
       <button class="ghost-btn" onclick="closeEditLog()">Cancel</button>
       <button class="green-btn" onclick="saveEditLog()">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Friend tracker modal -->
+<div class="overlay" id="friend-trackers-modal">
+  <div class="modal" style="width:380px">
+    <div class="modal-title" id="ft-modal-title">Friend's trackers</div>
+    <div id="ft-modal-content"></div>
+    <div class="modal-btns">
+      <button class="ghost-btn" onclick="document.getElementById('friend-trackers-modal').classList.remove('open')">Close</button>
+      <button class="green-btn" id="ft-challenge-btn" onclick="openChallengeFromFriend()">&#9876;&#65039; Challenge</button>
+    </div>
+  </div>
+</div>
+
+<!-- New challenge modal -->
+<div class="overlay" id="new-challenge-modal">
+  <div class="modal">
+    <div class="modal-title">New Challenge</div>
+    <div class="modal-row"><label>Challenge name</label><input id="ch-name" placeholder="e.g. Bench press battle"/></div>
+    <div class="modal-row"><label>Opponent</label><select id="ch-opponent"></select></div>
+    <div class="modal-row"><label>What are you tracking?</label><input id="ch-unit" placeholder="e.g. lbs, km, reps"/></div>
+    <div class="modal-row"><label>Win condition</label>
+      <select id="ch-metric">
+        <option value="percent">Highest % improvement</option>
+        <option value="absolute_up">Highest number wins</option>
+        <option value="absolute_down">Lowest number wins</option>
+      </select>
+    </div>
+    <div class="modal-row"><label>Your starting value</label><input id="ch-start" type="number" placeholder="e.g. 185" step="any"/></div>
+    <div class="modal-row"><label>Start date</label><input id="ch-start-date" type="date"/></div>
+    <div class="modal-row"><label>End date</label><input id="ch-end-date" type="date"/></div>
+    <div class="modal-btns">
+      <button class="ghost-btn" onclick="closeNewChallenge()">Cancel</button>
+      <button class="green-btn" id="ch-save-btn" onclick="saveChallenge()">Send challenge</button>
+    </div>
+  </div>
+</div>
+
+<!-- Challenge log modal -->
+<div class="overlay" id="challenge-log-modal">
+  <div class="modal">
+    <div class="modal-title" id="clog-title">Log progress</div>
+    <div class="modal-row"><label id="clog-unit-lbl">Current value</label><input id="clog-val" type="number" step="any"/></div>
+    <div class="modal-btns">
+      <button class="ghost-btn" onclick="document.getElementById('challenge-log-modal').classList.remove('open')">Cancel</button>
+      <button class="green-btn" onclick="saveChallengeLog()">Log it</button>
     </div>
   </div>
 </div>
@@ -462,6 +578,7 @@ async function loadData(){
     sb.from('rest_days').select('*')
   ]);
   trackers=(tData||[]).map(t=>({id:t.id,name:t.name,cat:t.cat,unit:t.unit,target:t.target,deadline:t.deadline,dir:t.dir||'up',logtype:t.logtype||'latest',sort_order:t.sort_order||0}));
+  await loadFriendsData();
   logs=(lData||[]).map(l=>({id:l.id,tid:l.tracker_id,val:l.val,note:l.note||'',date:l.date}));
   restDays=(rData||[]).map(r=>r.date);
 }
@@ -526,7 +643,7 @@ function getLatest(tid){const e=logs.filter(l=>l.tid===tid).sort((a,b)=>a.date.l
 // RENDER
 function renderStreakBanner(){
   const s=calcStreak();const b=document.getElementById('streak-banner');
-  if(s>=2){b.style.display='flex';document.getElementById('streak-text').textContent=s+' day streak! Keep it up';document.getElementById('streak-sub').textContent="You've logged every day for "+s+" days.";}
+  if(s>=2){b.style.display='flex';document.getElementById('streak-text').textContent=s+' day streak! Keep it up';document.getElementById('streak-sub').textContent="You have logged every day for "+s+" days.";}
   else b.style.display='none';
 }
 function renderMetrics(){
@@ -816,7 +933,360 @@ function switchTab(tab,btn){
   if(tab==='graphs'){renderChartTabs();if(activeChart)showChart(activeChart);}
   if(tab==='summary')renderSummary();
   if(tab==='todo')renderTodo();
+  if(tab==='friends')renderFriendsTab();
 }
+
+// FRIENDS & CHALLENGES
+let friends=[],pendingReceived=[],pendingSent=[],challenges=[],challengeLogs=[],friendProfiles={};
+let viewingFriendId=null,challengingFriendId=null,loggingChallengeId=null;
+
+async function loadFriendsData(){
+  const[{data:fData},{data:cData},{data:clData}]=await Promise.all([
+    sb.from('friends').select('*'),
+    sb.from('challenges').select('*').order('created_at',{ascending:false}),
+    sb.from('challenge_logs').select('*')
+  ]);
+  const allFriends=fData||[];
+  friends=allFriends.filter(f=>f.status==='accepted');
+  pendingReceived=allFriends.filter(f=>f.status==='pending'&&f.receiver_id===currentUser.id);
+  pendingSent=allFriends.filter(f=>f.status==='pending'&&f.requester_id===currentUser.id);
+  challenges=cData||[];
+  challengeLogs=clData||[];
+  // Load profiles for all friend/challenge users
+  const ids=[...new Set([
+    ...friends.map(f=>f.requester_id===currentUser.id?f.receiver_id:f.requester_id),
+    ...pendingReceived.map(f=>f.requester_id),
+    ...pendingSent.map(f=>f.receiver_id),
+    ...challenges.map(c=>[c.creator_id,c.opponent_id]).flat()
+  ].filter(id=>id!==currentUser.id))];
+  if(ids.length){
+    const{data:pData}=await sb.from('profiles').select('id,email').in('id',ids);
+    (pData||[]).forEach(p=>{friendProfiles[p.id]=p;});
+  }
+  updateFriendsNavBadge();
+}
+
+function updateFriendsNavBadge(){
+  const btn=document.getElementById('friends-nav-btn');
+  const count=pendingReceived.length+challenges.filter(c=>c.status==='pending'&&c.opponent_id===currentUser.id).length;
+  const existing=btn.querySelector('.tab-badge');if(existing)existing.remove();
+  if(count>0){const b=document.createElement('span');b.className='tab-badge';b.textContent=count;btn.appendChild(b);}
+}
+
+function getFriendEmail(id){return friendProfiles[id]?.email||id.slice(0,8)+'...';}
+function getInitial(email){return (email||'?')[0].toUpperCase();}
+
+function setFriendsTab(tab,btn){
+  document.querySelectorAll('#tab-friends .time-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('fsub-friends').style.display=tab==='friends'?'block':'none';
+  document.getElementById('fsub-challenges').style.display=tab==='challenges'?'block':'none';
+  if(tab==='challenges')renderChallenges();
+}
+
+async function searchFriend(){
+  const email=document.getElementById('friend-email-input').value.trim().toLowerCase();
+  const res=document.getElementById('friend-search-result');
+  if(!email){res.innerHTML='';return;}
+  if(email===currentUser.email){res.textContent='That is your own email!';res.style.color='var(--orange)';res.style.fontSize='13px';return;}
+  res.textContent='Searching...';res.style.color='var(--text-muted)';res.style.fontSize='13px';
+  const{data,error}=await sb.from('profiles').select('id,email').ilike('email',email).single();
+  if(error||!data){res.textContent='No user found with that email.';res.style.color='var(--orange)';return;}
+  const alreadyFriend=friends.some(f=>(f.requester_id===data.id||f.receiver_id===data.id));
+  const alreadyPending=pendingSent.some(f=>f.receiver_id===data.id)||pendingReceived.some(f=>f.requester_id===data.id);
+  if(alreadyFriend){res.textContent='Already friends!';res.style.color='var(--green)';return;}
+  if(alreadyPending){res.textContent='Friend request already pending.';res.style.color='var(--text-muted)';return;}
+  res.innerHTML='';res.style.color='';
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:8px;background:var(--entry-bg);border-radius:8px';
+  const left=document.createElement('div');left.style.cssText='display:flex;align-items:center;gap:8px';
+  const av=document.createElement('div');av.className='friend-avatar';av.textContent=getInitial(data.email);
+  const nameEl=document.createElement('div');nameEl.style.cssText='font-size:13px;font-weight:600';nameEl.textContent=data.email;
+  left.appendChild(av);left.appendChild(nameEl);
+  const btn=document.createElement('button');btn.className='green-btn';btn.style.cssText='padding:6px 12px;font-size:12px';btn.textContent='Add friend';
+  btn.onclick=()=>sendFriendRequest(data.id,data.email);
+  wrap.appendChild(left);wrap.appendChild(btn);res.appendChild(wrap);
+}
+
+async function sendFriendRequest(id,email){
+  const{error}=await sb.from('friends').insert({requester_id:currentUser.id,receiver_id:id,status:'pending'});
+  if(error){alert('Error: '+error.message);return;}
+  pendingSent.push({requester_id:currentUser.id,receiver_id:id,status:'pending'});
+  friendProfiles[id]={id,email};
+  document.getElementById('friend-search-result').innerHTML='<div style="font-size:13px;color:var(--green)">Friend request sent!</div>';
+  document.getElementById('friend-email-input').value='';
+  renderFriendsList();updateFriendsNavBadge();
+}
+
+async function acceptFriend(id){
+  const{error}=await sb.from('friends').update({status:'accepted'}).eq('requester_id',id).eq('receiver_id',currentUser.id);
+  if(error){alert('Error: '+error.message);return;}
+  const req=pendingReceived.find(f=>f.requester_id===id);
+  if(req){req.status='accepted';friends.push(req);pendingReceived=pendingReceived.filter(f=>f.requester_id!==id);}
+  showToast('Friend added!');renderFriendsList();updateFriendsNavBadge();
+}
+
+async function declineFriend(id){
+  await sb.from('friends').delete().eq('requester_id',id).eq('receiver_id',currentUser.id);
+  pendingReceived=pendingReceived.filter(f=>f.requester_id!==id);
+  renderFriendsList();updateFriendsNavBadge();
+}
+
+async function removeFriend(id){
+  if(!confirm('Remove this friend?'))return;
+  await sb.from('friends').delete().or('requester_id.eq.'+id+',receiver_id.eq.'+id);
+  friends=friends.filter(f=>f.requester_id!==id&&f.receiver_id!==id);
+  renderFriendsList();
+}
+
+function renderFriendsList(){
+  const pendSec=document.getElementById('pending-requests-section');
+  const pendList=document.getElementById('pending-requests-list');
+  if(pendingReceived.length){
+    pendSec.style.display='block';
+    pendList.innerHTML='';
+    pendingReceived.forEach(f=>{
+      const email=getFriendEmail(f.requester_id);
+      const div=document.createElement('div');div.className='friend-item';
+      div.innerHTML='<div style="display:flex;align-items:center;gap:10px"><div class="friend-avatar">'+getInitial(email)+'</div><div><div class="friend-email">'+email+'</div><div class="friend-sub">Wants to be your friend</div></div></div>';
+      const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px';
+      const acc=document.createElement('button');acc.className='green-btn';acc.style.cssText='padding:5px 10px;font-size:12px';acc.textContent='Accept';acc.onclick=()=>acceptFriend(f.requester_id);
+      const dec=document.createElement('button');dec.className='ghost-btn';dec.style.cssText='padding:5px 10px;font-size:12px';dec.textContent='Decline';dec.onclick=()=>declineFriend(f.requester_id);
+      btns.appendChild(acc);btns.appendChild(dec);div.appendChild(btns);pendList.appendChild(div);
+    });
+  } else pendSec.style.display='none';
+  const el=document.getElementById('friends-list');
+  if(!friends.length){el.innerHTML='<div style="padding:1.5rem;text-align:center;color:var(--text-muted);font-size:13px">No friends yet. Search for someone above!</div>';return;}
+  el.innerHTML='';
+  friends.forEach(f=>{
+    const fid=f.requester_id===currentUser.id?f.receiver_id:f.requester_id;
+    const email=getFriendEmail(fid);
+    const activeChallenges=challenges.filter(c=>c.status==='active'&&(c.creator_id===fid||c.opponent_id===fid)).length;
+    const div=document.createElement('div');div.className='friend-item';
+    div.innerHTML='<div style="display:flex;align-items:center;gap:10px"><div class="friend-avatar">'+getInitial(email)+'</div><div><div class="friend-email">'+email+'</div><div class="friend-sub">'+(activeChallenges?activeChallenges+' active challenge'+(activeChallenges>1?'s':''):'No active challenges')+'</div></div></div>';
+    const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px;align-items:center';
+    const view=document.createElement('button');view.className='ghost-btn';view.style.cssText='padding:5px 10px;font-size:12px';view.textContent='View';view.onclick=()=>viewFriendTrackers(fid);
+    const chal=document.createElement('button');chal.className='green-btn';chal.style.cssText='padding:5px 10px;font-size:12px';chal.textContent='Challenge';chal.onclick=()=>openChallengeFor(fid);
+    const del=document.createElement('button');del.className='del-btn';del.innerHTML='&#128465;';del.onclick=()=>removeFriend(fid);
+    btns.appendChild(view);btns.appendChild(chal);btns.appendChild(del);div.appendChild(btns);el.appendChild(div);
+  });
+}
+
+async function viewFriendTrackers(fid){
+  viewingFriendId=fid;
+  const email=getFriendEmail(fid);
+  document.getElementById('ft-modal-title').textContent=email+"'s trackers";
+  document.getElementById('ft-modal-content').innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:1rem 0">Loading...</div>';
+  document.getElementById('friend-trackers-modal').classList.add('open');
+  // Fetch their public trackers — we do this via a separate query (RLS allows reading all trackers for now; in future add visibility field)
+  const{data}=await sb.from('trackers').select('*').eq('user_id',fid);
+  const fTrackers=data||[];
+  if(!fTrackers.length){document.getElementById('ft-modal-content').innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:1rem 0">This friend has no public trackers yet.</div>';return;}
+  document.getElementById('ft-modal-content').innerHTML=fTrackers.map(t=>{
+    const c=getCatColor(t.cat);
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-soft)"><div><div style="font-size:13px;font-weight:600">'+t.name+'</div><div style="font-size:12px;color:var(--text-muted)">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target:'')+'</div></div><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span></div>';
+  }).join('');
+  document.getElementById('ft-challenge-btn').onclick=()=>openChallengeFor(fid);
+}
+
+function openChallengeFor(fid){
+  challengingFriendId=fid;
+  document.getElementById('friend-trackers-modal').classList.remove('open');
+  openNewChallenge(fid);
+}
+function openChallengeFromFriend(){openChallengeFor(viewingFriendId);}
+
+function openNewChallenge(fid){
+  const sel=document.getElementById('ch-opponent');
+  sel.innerHTML=friends.map(f=>{const id=f.requester_id===currentUser.id?f.receiver_id:f.requester_id;return '<option value="'+id+'">'+getFriendEmail(id)+'</option>';}).join('');
+  if(fid)sel.value=fid;
+  document.getElementById('ch-name').value='';
+  document.getElementById('ch-unit').value='';
+  document.getElementById('ch-start').value='';
+  document.getElementById('ch-start-date').value=todayStr();
+  const end=new Date();end.setDate(end.getDate()+7);
+  document.getElementById('ch-end-date').value=end.toISOString().slice(0,10);
+  document.getElementById('new-challenge-modal').classList.add('open');
+}
+function closeNewChallenge(){document.getElementById('new-challenge-modal').classList.remove('open');}
+
+async function saveChallenge(){
+  const name=document.getElementById('ch-name').value.trim();
+  const opponent=document.getElementById('ch-opponent').value;
+  const unit=document.getElementById('ch-unit').value.trim();
+  const metric=document.getElementById('ch-metric').value;
+  const startVal=parseFloat(document.getElementById('ch-start').value);
+  const startDate=document.getElementById('ch-start-date').value;
+  const endDate=document.getElementById('ch-end-date').value;
+  if(!name||!unit||isNaN(startVal)||!startDate||!endDate){alert('Please fill in all fields.');return;}
+  if(new Date(endDate)<=new Date(startDate)){alert('End date must be after start date.');return;}
+  const direction=metric==='absolute_down'?'down':'up';
+  const btn=document.getElementById('ch-save-btn');btn.disabled=true;btn.textContent='Sending...';
+  const{data,error}=await sb.from('challenges').insert({
+    creator_id:currentUser.id,opponent_id:opponent,name,metric,direction,unit,
+    start_date:startDate,end_date:endDate,status:'pending',creator_start:startVal
+  }).select().single();
+  btn.disabled=false;btn.textContent='Send challenge';
+  if(error){alert('Error: '+error.message);return;}
+  challenges.unshift(data);
+  closeNewChallenge();showToast('Challenge sent!');renderChallenges();
+  setFriendsTab('challenges',document.getElementById('ftab-challenges'));
+}
+
+async function acceptChallenge(id){
+  const startVal=prompt('Enter your starting value for this challenge:');
+  if(!startVal||isNaN(parseFloat(startVal)))return;
+  const{error}=await sb.from('challenges').update({status:'active',opponent_start:parseFloat(startVal)}).eq('id',id);
+  if(error){alert('Error: '+error.message);return;}
+  const i=challenges.findIndex(c=>c.id===id);
+  challenges[i]={...challenges[i],status:'active',opponent_start:parseFloat(startVal)};
+  showToast('Challenge accepted!');renderChallenges();updateFriendsNavBadge();
+}
+
+async function declineChallenge(id){
+  await sb.from('challenges').delete().eq('id',id);
+  challenges=challenges.filter(c=>c.id!==id);
+  renderChallenges();updateFriendsNavBadge();
+}
+
+function openChallengeLog(id){
+  loggingChallengeId=id;
+  const c=challenges.find(x=>x.id===id);
+  document.getElementById('clog-title').textContent='Log progress — '+c.name;
+  document.getElementById('clog-unit-lbl').textContent='Current value ('+c.unit+')';
+  document.getElementById('clog-val').value='';
+  document.getElementById('challenge-log-modal').classList.add('open');
+}
+
+async function saveChallengeLog(){
+  const val=parseFloat(document.getElementById('clog-val').value);
+  if(isNaN(val))return;
+  const{data,error}=await sb.from('challenge_logs').insert({challenge_id:loggingChallengeId,user_id:currentUser.id,val,date:todayStr()}).select().single();
+  if(error){alert('Error: '+error.message);return;}
+  challengeLogs.push(data);
+  document.getElementById('challenge-log-modal').classList.remove('open');
+  showToast('Progress logged!');renderChallenges();
+}
+
+function getLatestChallengeVal(challengeId,userId){
+  const entries=challengeLogs.filter(l=>l.challenge_id===challengeId&&l.user_id===userId).sort((a,b)=>b.date.localeCompare(a.date));
+  return entries.length?entries[0].val:null;
+}
+
+function calcProgress(c,userId){
+  const isCreator=c.creator_id===userId;
+  const startVal=isCreator?c.creator_start:c.opponent_start;
+  const latest=getLatestChallengeVal(c.id,userId);
+  if(startVal===null||startVal===undefined)return null;
+  const current=latest!==null?latest:startVal;
+  if(c.metric==='percent'){
+    if(startVal===0)return 0;
+    return((current-startVal)/Math.abs(startVal))*100;
+  }
+  return current;
+}
+
+function renderChallenges(){
+  const el=document.getElementById('challenges-list');
+  if(!challenges.length){el.innerHTML='<div class="card empty-state"><div class="icon">&#9876;&#65039;</div><h3>No challenges yet</h3><p>Challenge a friend to compete on any metric!</p></div>';return;}
+  const pendingIn=challenges.filter(ch=>ch.status==='pending'&&ch.opponent_id===currentUser.id);
+  const active=challenges.filter(ch=>ch.status==='active');
+  const completed=challenges.filter(ch=>ch.status==='completed');
+  const pendingOut=challenges.filter(ch=>ch.status==='pending'&&ch.creator_id===currentUser.id);
+  el.innerHTML='';
+
+  function makeCard(cls,inner){const d=document.createElement('div');d.className='challenge-card '+cls;d.innerHTML=inner;return d;}
+
+  if(pendingIn.length){
+    const h=document.createElement('div');h.className='sec-title';h.textContent='Incoming challenges';el.appendChild(h);
+    pendingIn.forEach(ch=>{
+      const senderEmail=getFriendEmail(ch.creator_id);
+      const days=Math.ceil((new Date(ch.end_date)-new Date(ch.start_date))/(1000*60*60*24));
+      const card=document.createElement('div');card.className='challenge-card pending-challenge';
+      card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:14px;font-weight:700">'+ch.name+'</div><span class="badge" style="background:rgba(245,158,11,0.15);color:var(--gold)">Pending</span></div><div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">From <strong>'+senderEmail+'</strong> &middot; '+ch.unit+' &middot; '+days+' days &middot; ends '+ch.end_date+'</div>';
+      const btns=document.createElement('div');btns.style.cssText='display:flex;gap:8px';
+      const acc=document.createElement('button');acc.className='green-btn';acc.style.cssText='font-size:12px;padding:6px 12px';acc.textContent='Accept';acc.onclick=()=>acceptChallenge(ch.id);
+      const dec=document.createElement('button');dec.className='ghost-btn';dec.style.cssText='font-size:12px;padding:6px 12px';dec.textContent='Decline';dec.onclick=()=>declineChallenge(ch.id);
+      btns.appendChild(acc);btns.appendChild(dec);card.appendChild(btns);el.appendChild(card);
+    });
+  }
+
+  if(active.length){
+    const h=document.createElement('div');h.className='sec-title';h.style.marginTop='8px';h.textContent='Active challenges';el.appendChild(h);
+    active.forEach(ch=>{
+      const isCreator=ch.creator_id===currentUser.id;
+      const oppId=isCreator?ch.opponent_id:ch.creator_id;
+      const oppEmail=getFriendEmail(oppId);
+      const myProg=calcProgress(ch,currentUser.id);
+      const theirProg=calcProgress(ch,oppId);
+      const daysLeft=daysUntil(ch.end_date);
+      const isPercent=ch.metric==='percent';
+      const myStart=isCreator?ch.creator_start:ch.opponent_start;
+      const theirStart=isCreator?ch.opponent_start:ch.creator_start;
+      const fmt=v=>v!==null?(isPercent?(v>=0?'+':'')+v.toFixed(1)+'%':v+' '+ch.unit):'No logs yet';
+      const fmtStart=v=>v!==null?'started: '+v+' '+ch.unit:'waiting...';
+      let whoLeading='',barYou=50,barThem=50;
+      if(myProg!==null&&theirProg!==null){
+        const myN=isPercent?myProg:(ch.direction==='up'?myProg:-myProg);
+        const theirN=isPercent?theirProg:(ch.direction==='up'?theirProg:-theirProg);
+        const total=Math.abs(myN)+Math.abs(theirN)||1;
+        barYou=Math.round((Math.max(0,myN+total/2)/(total))*60+20);
+        barThem=100-barYou;
+        if(myN>theirN)whoLeading='<span style="font-size:12px;color:var(--green);font-weight:600">You are leading! &#128293;</span>';
+        else if(theirN>myN)whoLeading='<span style="font-size:12px;color:var(--orange);font-weight:600">'+oppEmail+' is ahead</span>';
+        else whoLeading='<span style="font-size:12px;color:var(--text-muted)">Tied!</span>';
+      }
+      const card=document.createElement('div');card.className='challenge-card active-challenge';
+      card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div style="font-size:14px;font-weight:700">'+ch.name+'</div><span class="badge" style="background:var(--green-light);color:var(--green)">Active</span></div>'
+        +'<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">vs '+oppEmail+' &middot; '+(daysLeft!==null&&daysLeft>=0?daysLeft+' days left':daysLeft<0?'ended':'')+'</div>'
+        +'<div class="challenge-vs"><div class="challenge-player"><div class="challenge-player-name">You</div><div class="challenge-player-val">'+fmt(myProg)+'</div><div class="challenge-player-delta" style="color:var(--text-muted)">'+fmtStart(myStart)+'</div></div>'
+        +'<div class="challenge-divider">vs</div>'
+        +'<div class="challenge-player"><div class="challenge-player-name">'+oppEmail.split('@')[0]+'</div><div class="challenge-player-val">'+fmt(theirProg)+'</div><div class="challenge-player-delta" style="color:var(--text-muted)">'+fmtStart(theirStart)+'</div></div></div>'
+        +(myProg!==null||theirProg!==null?'<div class="challenge-bar-wrap"><div class="challenge-bar-you" style="width:'+barYou+'%"></div><div class="challenge-bar-them" style="width:'+barThem+'%"></div></div>':'')
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">'+whoLeading;
+      const logBtn=document.createElement('button');logBtn.className='green-btn';logBtn.style.cssText='font-size:12px;padding:6px 12px';logBtn.textContent='Log progress';logBtn.onclick=()=>openChallengeLog(ch.id);
+      card.appendChild(logBtn);el.appendChild(card);
+    });
+  }
+
+  if(pendingOut.length){
+    const h=document.createElement('div');h.className='sec-title';h.style.marginTop='8px';h.textContent='Sent challenges';el.appendChild(h);
+    pendingOut.forEach(ch=>{
+      const recipEmail=getFriendEmail(ch.opponent_id);
+      const card=document.createElement('div');card.className='challenge-card';
+      card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13px;font-weight:600">'+ch.name+'</div><div style="font-size:12px;color:var(--text-muted)">Waiting for '+recipEmail+' to accept</div></div><span class="badge" style="background:var(--summary-stat-bg);color:var(--text-muted)">Pending</span></div>';
+      el.appendChild(card);
+    });
+  }
+
+  if(completed.length){
+    const h=document.createElement('div');h.className='sec-title';h.style.marginTop='8px';h.textContent='Completed';el.appendChild(h);
+    completed.forEach(ch=>{
+      const oppId=ch.creator_id===currentUser.id?ch.opponent_id:ch.creator_id;
+      const myProg=calcProgress(ch,currentUser.id);const theirProg=calcProgress(ch,oppId);
+      const isPercent=ch.metric==='percent';
+      const myN=myProg!==null?(isPercent?myProg:(ch.direction==='up'?myProg:-myProg)):null;
+      const theirN=theirProg!==null?(isPercent?theirProg:(ch.direction==='up'?theirProg:-theirProg)):null;
+      const iWon=myN!==null&&theirN!==null&&myN>theirN;
+      const card=document.createElement('div');card.className='challenge-card';card.style.opacity='0.8';
+      card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13px;font-weight:600">'+ch.name+(iWon?' &#127942;':'')+'</div><div style="font-size:12px;color:var(--text-muted)">vs '+getFriendEmail(oppId)+' &middot; ended '+ch.end_date+'</div></div><span class="badge" style="background:var(--summary-stat-bg);color:var(--text-muted)">'+(iWon?'Won':'Completed')+'</span></div>';
+      el.appendChild(card);
+    });
+  }
+}
+
+function renderFriendsTab(){
+  renderFriendsList();
+  renderChallenges();
+  // Show pending challenge banner
+  const pendingIn=challenges.filter(c=>c.status==='pending'&&c.opponent_id===currentUser.id);
+  const banner=document.getElementById('pending-challenges-banner');
+  if(pendingIn.length){
+    banner.style.display='block';
+    document.getElementById('pending-challenges-list').innerHTML=pendingIn.map(c=>'<div style="font-size:13px;margin-bottom:6px">&#9876;&#65039; <strong>'+getFriendEmail(c.creator_id)+'</strong> challenged you: <strong>'+c.name+'</strong></div>').join('');
+  } else banner.style.display='none';
+}
+
 function renderAll(){renderStreakBanner();renderMetrics();renderTrackersList();renderLog();renderRecentEntries();renderChartTabs();updateRestDayBtn();}
 
 // AI COACH

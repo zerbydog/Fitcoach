@@ -639,8 +639,10 @@ function appendTyping(){const d=document.createElement('div');d.className='ai-ms
 async function callAI(msg){
   appendTyping();chatHistory.push({role:'user',content:msg});
   try{
-    const res=await fetch('https://ddferudzeppmvyljymbq.supabase.co/functions/v1/ai-coach',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer sb_publishable_ol_pvojRI22Z34_MYQouHQ_Lu7PbZ62'},body:JSON.stringify({system:sysPrompt+'\n\n'+buildCtx(),messages:chatHistory})});
-    const data=await res.json();const reply=data.reply||'Something went wrong.';
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token || 'sb_publishable_ol_pvojRI22Z34_MYQouHQ_Lu7PbZ62';
+    const res=await fetch('https://ddferudzeppmvyljymbq.supabase.co/functions/v1/ai-coach',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({system:sysPrompt+'\n\n'+buildCtx(),messages:chatHistory})});
+    const data=await res.json();console.log('Edge function response:',JSON.stringify(data));const reply=data.reply||'Something went wrong.';
     document.getElementById('typing-indicator').remove();appendMsg(reply,false);chatHistory.push({role:'assistant',content:reply});
   }catch(e){const el=document.getElementById('typing-indicator');if(el)el.remove();appendMsg('Connection error. Please try again.',false);chatHistory.pop();}
 }

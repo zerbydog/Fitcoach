@@ -16,25 +16,27 @@
 }
 body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .app{max-width:700px;margin:0 auto;padding:1.5rem 1rem}
-
-/* ── Auth screen ── */
 #auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
 .auth-card{background:white;border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,.07)}
 .auth-logo{width:48px;height:48px;background:var(--green);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
 .auth-logo svg{width:26px;height:26px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.auth-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:4px}
-.auth-sub{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:1.5rem}
-.auth-input{width:100%;font-size:14px;padding:10px 12px;border:1px solid #ddd;border-radius:9px;outline:none;font-family:inherit;margin-bottom:10px}
+.auth-title{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:1.25rem}
+.auth-tabs{display:flex;background:#f5f5f0;border-radius:10px;padding:4px;margin-bottom:1.25rem}
+.auth-tab{flex:1;padding:9px;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-muted);transition:all .15s}
+.auth-tab.active{background:white;color:var(--green);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.auth-input{width:100%;font-size:14px;padding:10px 12px;border:1px solid #ddd;border-radius:9px;outline:none;font-family:inherit;display:block;margin-bottom:10px}
 .auth-input:focus{border-color:var(--green)}
+.pw-wrap{position:relative;margin-bottom:10px}
+.pw-wrap .auth-input{margin-bottom:0;padding-right:44px}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:2px;line-height:1}
 .auth-btn{width:100%;background:var(--green);color:white;border:none;border-radius:9px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
 .auth-btn:hover{background:var(--green-dark)}
 .auth-btn:disabled{opacity:.6;cursor:not-allowed}
-.auth-msg{font-size:13px;text-align:center;margin-top:12px;color:var(--text-muted);line-height:1.6}
-.auth-err{color:var(--orange)}
-.auth-switch{font-size:13px;text-align:center;margin-top:14px;color:var(--text-muted)}
-.auth-switch a{color:var(--green);cursor:pointer;font-weight:600;text-decoration:none}
-
-/* ── Main app ── */
+.auth-err{font-size:13px;color:var(--orange);margin-top:10px;text-align:center;display:none}
+.auth-info{font-size:13px;color:var(--green);margin-top:10px;text-align:center;display:none}
+.auth-forgot{text-align:center;margin-top:12px}
+.auth-forgot a{font-size:13px;color:var(--text-muted);cursor:pointer;text-decoration:underline}
 #main-app{display:none}
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
 .logo{width:36px;height:36px;background:var(--green);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -135,51 +137,46 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 </head>
 <body>
 
-<!-- Loading screen -->
 <div id="loading-screen" class="loading-screen">
   <div class="spin"></div>
-  <div>Loading FitCoach…</div>
+  <div>Loading FitCoach...</div>
 </div>
 
-<!-- Auth screen -->
 <div id="auth-screen" style="display:none">
   <div class="auth-card">
     <div class="auth-logo">
       <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
     </div>
     <div class="auth-title">FitCoach AI</div>
-    <div class="auth-sub" id="auth-sub">Sign in to your account</div>
-
-    <input class="auth-input" type="email" id="auth-email" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')document.getElementById('auth-password').focus()"/>
-    <input class="auth-input" type="password" id="auth-password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleAuth()"/>
-
+    <div class="auth-sub">Your personal fitness tracker</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-signin-btn" onclick="setAuthMode('signin')">Sign In</button>
+      <button class="auth-tab" id="tab-signup-btn" onclick="setAuthMode('signup')">Sign Up</button>
+    </div>
+    <input class="auth-input" type="email" id="auth-email" placeholder="Email address" autocomplete="email"/>
+    <div class="pw-wrap">
+      <input class="auth-input" type="password" id="auth-password" placeholder="Password" autocomplete="current-password"/>
+      <button class="pw-toggle" id="pw-eye" onclick="togglePw()" title="Show/hide password">&#128065;</button>
+    </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
       <input type="checkbox" id="remember-me" checked style="width:15px;height:15px;accent-color:var(--green);cursor:pointer"/>
       <label for="remember-me" style="font-size:13px;color:var(--text-muted);cursor:pointer">Keep me signed in</label>
     </div>
-
-    <button class="auth-btn" id="auth-btn" onclick="handleAuth()">Sign in</button>
-    <div class="auth-msg auth-err" id="auth-err" style="display:none;margin-top:10px"></div>
-    <div class="auth-switch" style="margin-top:14px">
-      <span id="auth-switch-text">Don't have an account?</span>
-      <a id="auth-switch-link" onclick="toggleAuthMode()" style="margin-left:4px">Sign up</a>
-    </div>
-    <div class="auth-switch" id="forgot-row" style="margin-top:8px">
+    <button class="auth-btn" id="auth-btn" onclick="handleAuth()">Sign In</button>
+    <div class="auth-err" id="auth-err"></div>
+    <div class="auth-info" id="auth-info"></div>
+    <div class="auth-forgot" id="forgot-row">
       <a onclick="sendReset()">Forgot password?</a>
     </div>
-    <div class="auth-msg" id="auth-info" style="display:none;margin-top:10px"></div>
   </div>
 </div>
 
-<!-- Main app -->
 <div id="main-app">
 <div class="app">
 
 <div class="header">
   <div style="display:flex;align-items:center;gap:10px">
-    <div class="logo">
-      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-    </div>
+    <div class="logo"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
     <div><div class="app-title">FitCoach AI</div><div class="app-sub" id="user-email-lbl"></div></div>
   </div>
   <div class="header-right">
@@ -189,28 +186,27 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 </div>
 
 <div id="streak-banner" class="streak-banner" style="display:none">
-  <div class="streak-fire">🔥</div>
+  <div class="streak-fire">&#128293;</div>
   <div><div class="streak-text" id="streak-text"></div><div class="streak-sub" id="streak-sub"></div></div>
 </div>
 
 <div id="metrics-grid" class="metrics-grid"></div>
 
 <div class="nav">
-  <button class="nav-btn active" onclick="switchTab('log',this)">📋 Log</button>
-  <button class="nav-btn" onclick="switchTab('summary',this)">📊 Summary</button>
-  <button class="nav-btn" onclick="switchTab('graphs',this)">📈 Graphs</button>
-  <button class="nav-btn" onclick="switchTab('trackers',this)">⚙️ Trackers</button>
-  <button class="nav-btn" onclick="switchTab('coach',this)">🤖 Coach</button>
+  <button class="nav-btn active" onclick="switchTab('log',this)">&#128203; Log</button>
+  <button class="nav-btn" onclick="switchTab('summary',this)">&#128202; Summary</button>
+  <button class="nav-btn" onclick="switchTab('graphs',this)">&#128200; Graphs</button>
+  <button class="nav-btn" onclick="switchTab('trackers',this)">&#9881;&#65039; Trackers</button>
+  <button class="nav-btn" onclick="switchTab('coach',this)">&#129302; Coach</button>
 </div>
 
-<!-- LOG TAB -->
 <div id="tab-log" class="tab active">
   <div id="log-empty-state" style="display:none">
     <div class="card empty-state">
-      <div class="icon">📊</div>
+      <div class="icon">&#128202;</div>
       <h3>No trackers yet</h3>
       <p>Create your first tracker to start logging.</p>
-      <button class="green-btn" onclick="switchTab('trackers', document.querySelectorAll('.nav-btn')[3]); setTimeout(openAddTracker,100)">+ Create your first tracker</button>
+      <button class="green-btn" onclick="switchTab('trackers',document.querySelectorAll('.nav-btn')[3]);setTimeout(openAddTracker,100)">+ Create your first tracker</button>
     </div>
   </div>
   <div id="log-form-area">
@@ -227,13 +223,11 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
   </div>
 </div>
 
-<!-- SUMMARY TAB -->
 <div id="tab-summary" class="tab"><div id="summary-content"></div></div>
 
-<!-- GRAPHS TAB -->
 <div id="tab-graphs" class="tab">
   <div id="graphs-empty" style="display:none">
-    <div class="card empty-state"><div class="icon">📈</div><h3>Nothing to graph yet</h3><p>Add trackers and log some entries to see your progress charts here.</p></div>
+    <div class="card empty-state"><div class="icon">&#128200;</div><h3>Nothing to graph yet</h3><p>Add trackers and log some entries to see your progress charts here.</p></div>
   </div>
   <div id="graphs-content">
     <div class="sec-title">Select a tracker to graph</div>
@@ -242,7 +236,6 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
   </div>
 </div>
 
-<!-- TRACKERS TAB -->
 <div id="tab-trackers" class="tab">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
     <div class="sec-title" style="margin-bottom:0">Your trackers</div>
@@ -251,7 +244,6 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
   <div class="card" style="padding:0;overflow:hidden"><div id="trackers-list"></div></div>
 </div>
 
-<!-- COACH TAB -->
 <div id="tab-coach" class="tab">
   <div class="card">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
@@ -269,12 +261,11 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
   </div>
 </div>
 
-</div><!-- end .app -->
-</div><!-- end #main-app -->
+</div>
+</div>
 
-<div class="save-toast" id="save-toast">✓ Saved</div>
+<div class="save-toast" id="save-toast">Saved</div>
 
-<!-- Tracker modal -->
 <div class="overlay" id="tracker-modal">
   <div class="modal">
     <div class="modal-title" id="modal-title">New tracker</div>
@@ -286,7 +277,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
     <div class="modal-row"><label>Target (optional)</label><input id="t-target" type="number" placeholder="e.g. 225"/></div>
     <div class="modal-row"><label>Deadline (optional)</label><input id="t-deadline" type="date"/></div>
     <div class="modal-row"><label>Target direction</label>
-      <select id="t-dir"><option value="up">Higher is better (↑)</option><option value="down">Lower is better (↓)</option></select>
+      <select id="t-dir"><option value="up">Higher is better (up)</option><option value="down">Lower is better (down)</option></select>
     </div>
     <div class="modal-btns">
       <button class="ghost-btn" onclick="closeModal()">Cancel</button>
@@ -295,14 +286,13 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
   </div>
 </div>
 
-<!-- Target modal -->
 <div class="overlay" id="target-modal">
   <div class="modal">
     <div class="modal-title" id="tgt-modal-title">Edit target</div>
     <div class="modal-row"><label id="tgt-unit-label">Target</label><input id="tgt-val" type="number"/></div>
     <div class="modal-row"><label>Deadline (optional)</label><input id="tgt-deadline" type="date"/></div>
     <div class="modal-row"><label>Direction</label>
-      <select id="tgt-dir"><option value="up">Higher is better (↑)</option><option value="down">Lower is better (↓)</option></select>
+      <select id="tgt-dir"><option value="up">Higher is better (up)</option><option value="down">Lower is better (down)</option></select>
     </div>
     <div class="modal-btns">
       <button class="ghost-btn" onclick="closeTargetModal()">Cancel</button>
@@ -314,99 +304,82 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-// ── Supabase setup ────────────────────────────────────────
 const SUPABASE_URL = 'https://ddferudzeppmvyljymbq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ol_pvojRI22Z34_MYQouHQ_Lu7PbZ62';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let currentUser = null, trackers = [], logs = [];
 
-let currentUser = null;
-let trackers = [];
-let logs = [];
-
-// ── Auth ──────────────────────────────────────────────────
-let authMode = 'signin'; // 'signin' or 'signup'
+// AUTH
+let authMode = 'signin';
 
 async function init() {
   const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await showApp();
-  } else {
-    showAuthScreen();
-  }
+  if (session) { currentUser = session.user; await showApp(); }
+  else { showAuthScreen(); }
   sb.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      currentUser = session.user;
-      await showApp();
-    } else if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      showAuthScreen();
-    }
+    if (event === 'SIGNED_IN' && session) { currentUser = session.user; await showApp(); }
+    else if (event === 'SIGNED_OUT') { currentUser = null; showAuthScreen(); }
   });
 }
 
-function toggleAuthMode() {
-  authMode = authMode === 'signin' ? 'signup' : 'signin';
-  const isSignIn = authMode === 'signin';
-  document.getElementById('auth-sub').textContent = isSignIn ? 'Sign in to your account' : 'Create your account';
-  document.getElementById('auth-btn').textContent = isSignIn ? 'Sign in' : 'Sign up';
-  document.getElementById('auth-switch-text').textContent = isSignIn ? "Don't have an account?" : 'Already have an account?';
-  document.getElementById('auth-switch-link').textContent = isSignIn ? 'Sign up' : 'Sign in';
-  document.getElementById('forgot-row').style.display = isSignIn ? 'block' : 'none';
+function setAuthMode(mode) {
+  authMode = mode;
+  const isIn = mode === 'signin';
+  document.getElementById('tab-signin-btn').className = 'auth-tab' + (isIn ? ' active' : '');
+  document.getElementById('tab-signup-btn').className = 'auth-tab' + (!isIn ? ' active' : '');
+  document.getElementById('auth-btn').textContent = isIn ? 'Sign In' : 'Sign Up';
+  document.getElementById('auth-password').placeholder = isIn ? 'Password' : 'Create a password (min 6 chars)';
+  document.getElementById('auth-password').autocomplete = isIn ? 'current-password' : 'new-password';
+  document.getElementById('forgot-row').style.display = isIn ? 'block' : 'none';
   document.getElementById('auth-err').style.display = 'none';
   document.getElementById('auth-info').style.display = 'none';
-  document.getElementById('auth-password').placeholder = isSignIn ? 'Password' : 'Create a password (min 6 chars)';
-  document.getElementById('auth-password').autocomplete = isSignIn ? 'current-password' : 'new-password';
+}
+
+function togglePw() {
+  const pw = document.getElementById('auth-password');
+  const eye = document.getElementById('pw-eye');
+  pw.type = pw.type === 'password' ? 'text' : 'password';
+  eye.innerHTML = pw.type === 'text' ? '&#128584;' : '&#128065;';
 }
 
 async function handleAuth() {
   const email = document.getElementById('auth-email').value.trim();
   const password = document.getElementById('auth-password').value;
   const remember = document.getElementById('remember-me').checked;
-  const err = document.getElementById('auth-err');
+  const errEl = document.getElementById('auth-err');
+  const infoEl = document.getElementById('auth-info');
   const btn = document.getElementById('auth-btn');
-  err.style.display = 'none';
-  if (!email || !password) { err.textContent = 'Please enter your email and password.'; err.style.display = 'block'; return; }
+  errEl.style.display = 'none'; infoEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; errEl.style.display = 'block'; return; }
   btn.disabled = true;
-  btn.textContent = authMode === 'signin' ? 'Signing in…' : 'Creating account…';
-
-  let result;
+  btn.textContent = authMode === 'signin' ? 'Signing in...' : 'Creating account...';
   if (authMode === 'signup') {
-    result = await sb.auth.signUp({ email, password });
+    const { data, error } = await sb.auth.signUp({ email, password });
+    btn.disabled = false; btn.textContent = 'Sign Up';
+    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; return; }
+    if (!data.session) {
+      infoEl.textContent = 'Account created! You can sign in now.';
+      infoEl.style.display = 'block';
+      setAuthMode('signin');
+    }
   } else {
-    result = await sb.auth.signInWithPassword({
-      email, password,
-      options: { persistSession: remember }
-    });
-  }
-
-  const { error } = result;
-  btn.disabled = false;
-  btn.textContent = authMode === 'signin' ? 'Sign in' : 'Sign up';
-  if (error) {
-    err.textContent = error.message;
-    err.style.display = 'block';
-  } else if (authMode === 'signup') {
-    const info = document.getElementById('auth-info');
-    info.textContent = '✅ Account created! You can sign in now.';
-    info.style.display = 'block';
-    // Auto switch to sign in
-    authMode = 'signup'; toggleAuthMode();
+    const { error } = await sb.auth.signInWithPassword({ email, password, options: { persistSession: remember } });
+    btn.disabled = false; btn.textContent = 'Sign In';
+    if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; }
   }
 }
 
 async function sendReset() {
   const email = document.getElementById('auth-email').value.trim();
-  if (!email) { const err=document.getElementById('auth-err'); err.textContent='Enter your email above first.'; err.style.display='block'; return; }
+  const errEl = document.getElementById('auth-err');
+  const infoEl = document.getElementById('auth-info');
+  if (!email) { errEl.textContent = 'Enter your email above first.'; errEl.style.display = 'block'; return; }
   await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
-  const info = document.getElementById('auth-info');
-  info.textContent = '📧 Password reset email sent! Check your inbox.';
-  info.style.display = 'block';
+  infoEl.textContent = 'Password reset email sent! Check your inbox.';
+  infoEl.style.display = 'block';
 }
 
-async function signOut() {
-  await sb.auth.signOut();
-}
+async function signOut() { await sb.auth.signOut(); }
 
 function showAuthScreen() {
   document.getElementById('loading-screen').style.display = 'none';
@@ -424,349 +397,251 @@ async function showApp() {
   renderAll();
   renderQuickPrompts();
   if (!document.getElementById('ai-messages').children.length) {
-    const welcome = trackers.length
-      ? "Hey! I can see your tracker data. What do you want to work on today?"
-      : "Hey! Welcome to FitCoach AI. Create your first tracker in the Trackers tab to get started!";
-    appendMsg(welcome, false);
+    appendMsg(trackers.length ? "Hey! I can see your tracker data. What do you want to work on today?" : "Hey! Welcome to FitCoach AI. Create your first tracker in the Trackers tab to get started!", false);
   }
 }
 
-// ── Data loading from Supabase ────────────────────────────
 async function loadData() {
   const [{ data: tData }, { data: lData }] = await Promise.all([
     sb.from('trackers').select('*').order('created_at'),
     sb.from('logs').select('*').order('date')
   ]);
-  trackers = (tData || []).map(t => ({
-    id: t.id, name: t.name, cat: t.cat, unit: t.unit,
-    target: t.target, deadline: t.deadline, dir: t.dir || 'up'
-  }));
-  logs = (lData || []).map(l => ({
-    id: l.id, tid: l.tracker_id, val: l.val,
-    note: l.note || '', date: l.date
-  }));
+  trackers = (tData||[]).map(t=>({id:t.id,name:t.name,cat:t.cat,unit:t.unit,target:t.target,deadline:t.deadline,dir:t.dir||'up'}));
+  logs = (lData||[]).map(l=>({id:l.id,tid:l.tracker_id,val:l.val,note:l.note||'',date:l.date}));
 }
 
 function showToast(msg) {
   const t = document.getElementById('save-toast');
-  t.textContent = msg || '✓ Saved';
+  t.textContent = msg || 'Saved';
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 1800);
+  setTimeout(()=>t.classList.remove('show'), 1800);
 }
 
-// ── Date helpers ──────────────────────────────────────────
+// DATE
 function setupDate() {
-  const d = new Date();
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  document.getElementById('date-pill').textContent = dayNames[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
-  document.getElementById('log-date').value = todayStr();
+  const d=new Date();
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  document.getElementById('date-pill').textContent=days[d.getDay()]+', '+months[d.getMonth()]+' '+d.getDate();
+  document.getElementById('log-date').value=todayStr();
 }
-function todayStr() { return new Date().toISOString().slice(0, 10); }
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  return Math.ceil((new Date(dateStr) - new Date(todayStr())) / 86400000);
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function daysUntil(ds){if(!ds)return null;return Math.ceil((new Date(ds)-new Date(todayStr()))/86400000);}
+function formatDeadline(ds){const d=daysUntil(ds);if(d===null)return '';if(d<0)return 'Deadline passed';if(d===0)return 'Due today!';if(d===1)return '1 day left';return d+' days left';}
+
+const CAT_COLORS={Strength:{bg:'#dbeafe',text:'#1e40af'},Cardio:{bg:'#d1fae5',text:'#065f46'},Basketball:{bg:'#fef3c7',text:'#92400e'},Nutrition:{bg:'#dcfce7',text:'#166534'},Sleep:{bg:'#ede9fe',text:'#4c1d95'},Recovery:{bg:'#fee2e2',text:'#991b1b'},Custom:{bg:'#f3f4f6',text:'#374151'}};
+
+// STREAKS
+function calcStreak(){
+  if(!logs.length)return 0;
+  const dates=[...new Set(logs.map(l=>l.date))].sort((a,b)=>b.localeCompare(a));
+  let s=0,check=todayStr();
+  if(dates[0]!==check){const yd=new Date();yd.setDate(yd.getDate()-1);const ys=yd.toISOString().slice(0,10);if(dates[0]!==ys)return 0;check=ys;}
+  for(const date of dates){if(date===check){s++;const p=new Date(check);p.setDate(p.getDate()-1);check=p.toISOString().slice(0,10);}else break;}
+  return s;
 }
-function formatDeadline(dateStr) {
-  const days = daysUntil(dateStr);
-  if (days === null) return '';
-  if (days < 0) return '⚠️ Deadline passed';
-  if (days === 0) return '🎯 Due today!';
-  if (days === 1) return '⏰ 1 day left';
-  return '📅 ' + days + ' days left';
+function calcTrackerStreak(tid){
+  const dates=[...new Set(logs.filter(l=>l.tid===tid).map(l=>l.date))].sort((a,b)=>b.localeCompare(a));
+  if(!dates.length)return 0;
+  let s=0,check=todayStr();
+  if(dates[0]!==check){const yd=new Date();yd.setDate(yd.getDate()-1);const ys=yd.toISOString().slice(0,10);if(dates[0]!==ys)return 0;check=ys;}
+  for(const d of dates){if(d===check){s++;const p=new Date(check);p.setDate(p.getDate()-1);check=p.toISOString().slice(0,10);}else break;}
+  return s;
+}
+function getLatest(tid){const e=logs.filter(l=>l.tid===tid).sort((a,b)=>a.date.localeCompare(b.date));return e.length?e[e.length-1]:null;}
+
+// RENDER
+function renderStreakBanner(){
+  const s=calcStreak();const b=document.getElementById('streak-banner');
+  if(s>=2){b.style.display='flex';document.getElementById('streak-text').textContent=s+' day streak! Keep it up';document.getElementById('streak-sub').textContent="You've logged every day for "+s+" days in a row.";}
+  else b.style.display='none';
 }
 
-const CAT_COLORS = {
-  Strength:{bg:'#dbeafe',text:'#1e40af'}, Cardio:{bg:'#d1fae5',text:'#065f46'},
-  Basketball:{bg:'#fef3c7',text:'#92400e'}, Nutrition:{bg:'#dcfce7',text:'#166534'},
-  Sleep:{bg:'#ede9fe',text:'#4c1d95'}, Recovery:{bg:'#fee2e2',text:'#991b1b'},
-  Custom:{bg:'#f3f4f6',text:'#374151'}
-};
-
-// ── Streak helpers ────────────────────────────────────────
-function calcStreak() {
-  if (!logs.length) return 0;
-  const allDates = [...new Set(logs.map(l => l.date))].sort((a,b) => b.localeCompare(a));
-  let streak = 0, check = todayStr();
-  if (allDates[0] !== check) {
-    const yd = new Date(); yd.setDate(yd.getDate()-1);
-    const ys = yd.toISOString().slice(0,10);
-    if (allDates[0] !== ys) return 0;
-    check = ys;
-  }
-  for (const date of allDates) {
-    if (date === check) { streak++; const p=new Date(check); p.setDate(p.getDate()-1); check=p.toISOString().slice(0,10); }
-    else break;
-  }
-  return streak;
-}
-function calcTrackerStreak(tid) {
-  const dates = [...new Set(logs.filter(l=>l.tid===tid).map(l=>l.date))].sort((a,b)=>b.localeCompare(a));
-  if (!dates.length) return 0;
-  let streak=0, check=todayStr();
-  if (dates[0]!==check) { const yd=new Date(); yd.setDate(yd.getDate()-1); const ys=yd.toISOString().slice(0,10); if(dates[0]!==ys) return 0; check=ys; }
-  for (const date of dates) { if(date===check){streak++;const p=new Date(check);p.setDate(p.getDate()-1);check=p.toISOString().slice(0,10);}else break; }
-  return streak;
-}
-function getLatest(tid) {
-  const e = logs.filter(l=>l.tid===tid).sort((a,b)=>a.date.localeCompare(b.date));
-  return e.length ? e[e.length-1] : null;
-}
-
-// ── Render functions ──────────────────────────────────────
-function renderStreakBanner() {
-  const streak = calcStreak();
-  const banner = document.getElementById('streak-banner');
-  if (streak >= 2) {
-    banner.style.display = 'flex';
-    document.getElementById('streak-text').textContent = streak + ' day streak! Keep it up 💪';
-    document.getElementById('streak-sub').textContent = "You've logged every day for " + streak + " days in a row.";
-  } else { banner.style.display = 'none'; }
-}
-
-function renderMetrics() {
-  const g = document.getElementById('metrics-grid'); g.innerHTML = '';
-  if (!trackers.length) return;
-  trackers.forEach(t => {
-    const latest = getLatest(t.id); const val = latest ? latest.val : null;
-    const c = CAT_COLORS[t.cat] || CAT_COLORS.Custom;
-    let delta = '';
-    if (t.target && val != null) {
-      const diff = t.dir==='up' ? (val-t.target) : (t.target-val);
-      delta = diff>=0 ? '<div class="metric-target delta-up">✓ On target</div>' : '<div class="metric-target delta-down">'+(t.dir==='up'?'':'+')+Math.abs(diff).toFixed(1)+' '+t.unit+' to go</div>';
-    }
-    const tgt = t.target ? '<div class="metric-target">Target: '+t.target+' '+t.unit+'</div>' : '<div class="metric-target" style="color:#bbb">No target set</div>';
-    const dl = t.deadline ? '<div class="metric-deadline">'+formatDeadline(t.deadline)+'</div>' : '';
-    const streak = calcTrackerStreak(t.id);
-    const sb2 = streak>=2 ? '<div class="metric-streak">🔥 '+streak+' day streak</div>' : '';
-    g.innerHTML += '<div class="metric-card" onclick="openTargetEdit(\''+t.id+'\')" title="Click to edit target"><div class="metric-label"><span class="metric-dot" style="background:'+c.text+'"></span>'+t.name+'</div><div class="metric-value">'+(val!=null?val:'—')+' <span class="metric-unit">'+t.unit+'</span></div>'+tgt+(delta||'')+dl+sb2+'</div>';
-  });
-}
-
-function renderTrackersList() {
-  const el = document.getElementById('trackers-list');
-  if (!trackers.length) { el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--text-light);font-size:13px"><div style="font-size:2rem;margin-bottom:8px">⚙️</div><strong style="display:block;margin-bottom:6px;color:#888">No trackers yet</strong>Hit the button above to create your first one.</div>'; return; }
-  el.innerHTML = trackers.map(t => {
-    const c = CAT_COLORS[t.cat]||CAT_COLORS.Custom;
-    const dl = t.deadline ? '<div style="font-size:11px;color:var(--purple);margin-top:2px">'+formatDeadline(t.deadline)+'</div>' : '';
-    return '<div class="tracker-item"><div><div class="tracker-name">'+t.name+'</div><div class="tracker-cat">'+t.cat+' · '+t.unit+(t.target?' · Target: '+t.target:'')+'</div>'+dl+'</div><div style="display:flex;align-items:center;gap:8px"><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span><button class="edit-btn" onclick="openEditTracker(\''+t.id+'\')">✏️ Edit</button><button class="del-btn" onclick="deleteTracker(\''+t.id+'\')">🗑</button></div></div>';
-  }).join('');
-}
-
-function renderLog() {
-  const has = trackers.length > 0;
-  document.getElementById('log-empty-state').style.display = has ? 'none' : 'block';
-  document.getElementById('log-form-area').style.display = has ? 'block' : 'none';
-  if (!has) return;
-  const sel = document.getElementById('log-tracker'); const cur = sel.value;
-  sel.innerHTML = trackers.map(t=>'<option value="'+t.id+'">'+t.name+'</option>').join('');
-  if (cur) sel.value = cur;
-  updateLogFields();
-}
-function updateLogFields() {
-  const t = trackers.find(x=>x.id===document.getElementById('log-tracker').value);
-  document.getElementById('log-unit-lbl').textContent = t ? t.unit : '';
-}
-
-async function addLog() {
-  const tid = document.getElementById('log-tracker').value;
-  const val = parseFloat(document.getElementById('log-val').value);
-  const note = document.getElementById('log-note').value.trim();
-  const date = document.getElementById('log-date').value || todayStr();
-  if (!tid || isNaN(val)) return;
-  const btn = document.getElementById('log-btn');
-  btn.disabled = true; btn.textContent = 'Saving…';
-  const { data, error } = await sb.from('logs').insert({
-    user_id: currentUser.id, tracker_id: tid, val, note, date
-  }).select().single();
-  btn.disabled = false; btn.textContent = '+ Log entry';
-  if (error) { alert('Error saving: ' + error.message); return; }
-  logs.push({ id: data.id, tid: data.tracker_id, val: data.val, note: data.note||'', date: data.date });
-  document.getElementById('log-val').value = '';
-  document.getElementById('log-note').value = '';
-  document.getElementById('log-date').value = todayStr();
-  showToast('✓ Entry logged!');
-  renderAll();
-}
-
-function renderRecentEntries() {
-  const el = document.getElementById('recent-entries'); if (!el) return;
-  const sorted = [...logs].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).slice(0,20);
-  if (!sorted.length) { el.innerHTML='<div class="no-data">No entries yet. Log something above!</div>'; return; }
-  el.innerHTML = sorted.map(l => {
-    const t = trackers.find(x=>x.id===l.tid); if(!t) return '';
-    const c = CAT_COLORS[t.cat]||CAT_COLORS.Custom;
-    return '<div class="entry-item"><div style="flex:1"><div class="entry-name">'+t.name+(l.note?' <span style="font-weight:400;color:#888">— '+l.note+'</span>':'')+'</div><div class="entry-meta">'+l.date+' · '+t.cat+'</div></div><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+l.val+' '+t.unit+'</span><button class="del-btn" style="margin-left:8px" onclick="deleteLog(\''+l.id+'\')" title="Delete">🗑</button></div>';
-  }).join('');
-}
-
-async function deleteLog(id) {
-  if (!confirm('Delete this log entry?')) return;
-  const { error } = await sb.from('logs').delete().eq('id', id);
-  if (error) { alert('Error: ' + error.message); return; }
-  logs = logs.filter(l=>l.id!==id);
-  showToast('🗑 Entry deleted');
-  renderAll();
-}
-
-// ── Weekly summary ────────────────────────────────────────
-function renderSummary() {
-  const el = document.getElementById('summary-content');
-  if (!trackers.length) { el.innerHTML='<div class="card empty-state"><div class="icon">📊</div><h3>Nothing to summarize yet</h3><p>Add trackers and log some entries to see your weekly summary.</p></div>'; return; }
-  const today=new Date(todayStr()), weekAgo=new Date(today);
-  weekAgo.setDate(weekAgo.getDate()-6);
-  const prevStart=new Date(weekAgo); prevStart.setDate(prevStart.getDate()-7);
-  const prevEnd=new Date(weekAgo); prevEnd.setDate(prevEnd.getDate()-1);
-  function inRange(ds,from,to){const d=new Date(ds);return d>=from&&d<=to;}
-  const twLogs=logs.filter(l=>inRange(l.date,weekAgo,today));
-  const lwLogs=logs.filter(l=>inRange(l.date,prevStart,prevEnd));
-  const streak=calcStreak();
-  let html='<div class="sec-title">This week — overview</div><div class="summary-grid">';
-  html+='<div class="summary-stat"><div class="summary-stat-val">'+twLogs.length+'</div><div class="summary-stat-lbl">Entries logged</div></div>';
-  html+='<div class="summary-stat"><div class="summary-stat-val">'+[...new Set(twLogs.map(l=>l.date))].length+'</div><div class="summary-stat-lbl">Active days</div></div>';
-  html+='<div class="summary-stat"><div class="summary-stat-val">'+(streak||0)+'</div><div class="summary-stat-lbl">Day streak 🔥</div></div>';
-  html+='<div class="summary-stat"><div class="summary-stat-val">'+[...new Set(twLogs.map(l=>l.tid))].length+'</div><div class="summary-stat-lbl">Trackers used</div></div>';
-  html+='</div><div class="sec-title" style="margin-top:4px">Tracker breakdown</div><div class="card" style="padding:0.75rem 1.25rem">';
-  let anyData=false;
+function renderMetrics(){
+  const g=document.getElementById('metrics-grid');g.innerHTML='';if(!trackers.length)return;
   trackers.forEach(t=>{
-    const tw=twLogs.filter(l=>l.tid===t.id), lw=lwLogs.filter(l=>l.tid===t.id);
-    if(!tw.length&&!lw.length) return;
-    anyData=true;
-    const twAvg=tw.length?tw.reduce((a,b)=>a+b.val,0)/tw.length:null;
-    const lwAvg=lw.length?lw.reduce((a,b)=>a+b.val,0)/lw.length:null;
-    const latest=getLatest(t.id);
-    let changeHtml='';
-    if(twAvg!==null&&lwAvg!==null){
-      const diff=twAvg-lwAvg, pct=((diff/lwAvg)*100).toFixed(1);
-      const isGood=(t.dir==='up'&&diff>=0)||(t.dir==='down'&&diff<=0);
-      changeHtml='<span style="font-size:12px;font-weight:600;color:'+(isGood?'var(--green)':'var(--orange)')+'\">'+(diff>=0?'↑':'↓')+' '+Math.abs(pct)+'% vs last week</span>';
-    } else if(twAvg!==null){
-      changeHtml='<span style="font-size:12px;color:var(--text-muted)">No data last week</span>';
-    }
-    let progressHtml='';
-    if(t.target&&latest){
-      const pct=Math.max(0,Math.min(100,t.dir==='up'?(latest.val/t.target)*100:((2*t.target-latest.val)/t.target)*100)).toFixed(0);
-      progressHtml='<div style="margin-top:6px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:3px"><span>Goal progress</span><span>'+pct+'%</span></div><div class="prog-bar-wrap"><div class="prog-bar" style="width:'+pct+'%"></div></div></div>';
-      if(t.deadline) progressHtml+='<div style="font-size:11px;color:var(--purple);margin-top:4px">'+formatDeadline(t.deadline)+'</div>';
-    }
-    const c=CAT_COLORS[t.cat]||CAT_COLORS.Custom;
-    html+='<div class="tracker-summary-row"><div style="flex:1"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="font-size:13px;font-weight:600">'+t.name+'</span><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span></div><div style="font-size:12px;color:var(--text-muted)">'+tw.length+' entr'+(tw.length===1?'y':'ies')+' this week'+(twAvg!==null?' · avg '+twAvg.toFixed(1)+' '+t.unit:'')+'</div>'+(changeHtml?'<div style="margin-top:3px">'+changeHtml+'</div>':'')+progressHtml+'</div></div>';
+    const latest=getLatest(t.id);const val=latest?latest.val:null;const c=CAT_COLORS[t.cat]||CAT_COLORS.Custom;
+    let delta='';
+    if(t.target&&val!=null){const diff=t.dir==='up'?(val-t.target):(t.target-val);delta=diff>=0?'<div class="metric-target delta-up">On target</div>':'<div class="metric-target delta-down">'+Math.abs(diff).toFixed(1)+' '+t.unit+' to go</div>';}
+    const tgt=t.target?'<div class="metric-target">Target: '+t.target+' '+t.unit+'</div>':'<div class="metric-target" style="color:#bbb">No target</div>';
+    const dl=t.deadline?'<div class="metric-deadline">'+formatDeadline(t.deadline)+'</div>':'';
+    const streak=calcTrackerStreak(t.id);const sb2=streak>=2?'<div class="metric-streak">'+streak+' day streak</div>':'';
+    g.innerHTML+='<div class="metric-card" onclick="openTargetEdit(\''+t.id+'\')" title="Click to edit target"><div class="metric-label"><span class="metric-dot" style="background:'+c.text+'"></span>'+t.name+'</div><div class="metric-value">'+(val!=null?val:'&mdash;')+' <span class="metric-unit">'+t.unit+'</span></div>'+tgt+(delta||'')+dl+sb2+'</div>';
   });
-  if(!anyData) html+='<div class="no-data">No entries logged in the past two weeks.</div>';
-  html+='</div>';
-  el.innerHTML=html;
 }
 
-// ── Graphs ────────────────────────────────────────────────
-let activeChart=null, activeChartInst=null;
-function renderChartTabs() {
+function renderTrackersList(){
+  const el=document.getElementById('trackers-list');
+  if(!trackers.length){el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--text-light);font-size:13px"><div style="font-size:2rem;margin-bottom:8px">&#9881;&#65039;</div><strong style="display:block;margin-bottom:6px;color:#888">No trackers yet</strong>Hit the button above to create your first one.</div>';return;}
+  el.innerHTML=trackers.map(t=>{const c=CAT_COLORS[t.cat]||CAT_COLORS.Custom;const dl=t.deadline?'<div style="font-size:11px;color:var(--purple);margin-top:2px">'+formatDeadline(t.deadline)+'</div>':'';return '<div class="tracker-item"><div><div class="tracker-name">'+t.name+'</div><div class="tracker-cat">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target:'')+'</div>'+dl+'</div><div style="display:flex;align-items:center;gap:8px"><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span><button class="edit-btn" onclick="openEditTracker(\''+t.id+'\')">Edit</button><button class="del-btn" onclick="deleteTracker(\''+t.id+'\')">&#128465;</button></div></div>';}).join('');
+}
+
+function renderLog(){
+  const has=trackers.length>0;
+  document.getElementById('log-empty-state').style.display=has?'none':'block';
+  document.getElementById('log-form-area').style.display=has?'block':'none';
+  if(!has)return;
+  const sel=document.getElementById('log-tracker');const cur=sel.value;
+  sel.innerHTML=trackers.map(t=>'<option value="'+t.id+'">'+t.name+'</option>').join('');
+  if(cur)sel.value=cur;updateLogFields();
+}
+function updateLogFields(){const t=trackers.find(x=>x.id===document.getElementById('log-tracker').value);document.getElementById('log-unit-lbl').textContent=t?t.unit:'';}
+
+async function addLog(){
+  const tid=document.getElementById('log-tracker').value;
+  const val=parseFloat(document.getElementById('log-val').value);
+  const note=document.getElementById('log-note').value.trim();
+  const date=document.getElementById('log-date').value||todayStr();
+  if(!tid||isNaN(val))return;
+  const btn=document.getElementById('log-btn');btn.disabled=true;btn.textContent='Saving...';
+  const{data,error}=await sb.from('logs').insert({user_id:currentUser.id,tracker_id:tid,val,note,date}).select().single();
+  btn.disabled=false;btn.textContent='+ Log entry';
+  if(error){alert('Error: '+error.message);return;}
+  logs.push({id:data.id,tid:data.tracker_id,val:data.val,note:data.note||'',date:data.date});
+  document.getElementById('log-val').value='';document.getElementById('log-note').value='';document.getElementById('log-date').value=todayStr();
+  showToast('Entry logged!');renderAll();
+}
+
+function renderRecentEntries(){
+  const el=document.getElementById('recent-entries');if(!el)return;
+  const sorted=[...logs].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id)).slice(0,20);
+  if(!sorted.length){el.innerHTML='<div class="no-data">No entries yet. Log something above!</div>';return;}
+  el.innerHTML=sorted.map(l=>{const t=trackers.find(x=>x.id===l.tid);if(!t)return '';const c=CAT_COLORS[t.cat]||CAT_COLORS.Custom;return '<div class="entry-item"><div style="flex:1"><div class="entry-name">'+t.name+(l.note?' <span style="font-weight:400;color:#888">&mdash; '+l.note+'</span>':'')+'</div><div class="entry-meta">'+l.date+' &middot; '+t.cat+'</div></div><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+l.val+' '+t.unit+'</span><button class="del-btn" style="margin-left:8px" onclick="deleteLog(\''+l.id+'\')" title="Delete">&#128465;</button></div>';}).join('');
+}
+
+async function deleteLog(id){
+  if(!confirm('Delete this entry?'))return;
+  const{error}=await sb.from('logs').delete().eq('id',id);
+  if(error){alert('Error: '+error.message);return;}
+  logs=logs.filter(l=>l.id!==id);showToast('Entry deleted');renderAll();
+}
+
+// SUMMARY
+function renderSummary(){
+  const el=document.getElementById('summary-content');
+  if(!trackers.length){el.innerHTML='<div class="card empty-state"><div class="icon">&#128202;</div><h3>Nothing yet</h3><p>Add trackers and log entries to see your weekly summary.</p></div>';return;}
+  const today=new Date(todayStr()),wa=new Date(today);wa.setDate(wa.getDate()-6);
+  const ps=new Date(wa);ps.setDate(ps.getDate()-7);const pe=new Date(wa);pe.setDate(pe.getDate()-1);
+  function inR(ds,f,t){const d=new Date(ds);return d>=f&&d<=t;}
+  const tw=logs.filter(l=>inR(l.date,wa,today));const lw=logs.filter(l=>inR(l.date,ps,pe));
+  const streak=calcStreak();
+  let html='<div class="sec-title">This week</div><div class="summary-grid">';
+  html+='<div class="summary-stat"><div class="summary-stat-val">'+tw.length+'</div><div class="summary-stat-lbl">Entries logged</div></div>';
+  html+='<div class="summary-stat"><div class="summary-stat-val">'+[...new Set(tw.map(l=>l.date))].length+'</div><div class="summary-stat-lbl">Active days</div></div>';
+  html+='<div class="summary-stat"><div class="summary-stat-val">'+(streak||0)+'</div><div class="summary-stat-lbl">Day streak</div></div>';
+  html+='<div class="summary-stat"><div class="summary-stat-val">'+[...new Set(tw.map(l=>l.tid))].length+'</div><div class="summary-stat-lbl">Trackers used</div></div>';
+  html+='</div><div class="sec-title" style="margin-top:4px">Tracker breakdown</div><div class="card" style="padding:0.75rem 1.25rem">';
+  let any=false;
+  trackers.forEach(t=>{
+    const twt=tw.filter(l=>l.tid===t.id),lwt=lw.filter(l=>l.tid===t.id);
+    if(!twt.length&&!lwt.length)return;any=true;
+    const twAvg=twt.length?twt.reduce((a,b)=>a+b.val,0)/twt.length:null;
+    const lwAvg=lwt.length?lwt.reduce((a,b)=>a+b.val,0)/lwt.length:null;
+    const latest=getLatest(t.id);
+    let ch='';
+    if(twAvg!==null&&lwAvg!==null){const diff=twAvg-lwAvg,pct=((diff/lwAvg)*100).toFixed(1);const good=(t.dir==='up'&&diff>=0)||(t.dir==='down'&&diff<=0);ch='<span style="font-size:12px;font-weight:600;color:'+(good?'var(--green)':'var(--orange)')+'\">'+(diff>=0?'up':'down')+' '+Math.abs(pct)+'% vs last week</span>';}
+    else if(twAvg!==null)ch='<span style="font-size:12px;color:var(--text-muted)">No data last week</span>';
+    let prog='';
+    if(t.target&&latest){const pct=Math.max(0,Math.min(100,t.dir==='up'?(latest.val/t.target)*100:((2*t.target-latest.val)/t.target)*100)).toFixed(0);prog='<div style="margin-top:6px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:3px"><span>Goal progress</span><span>'+pct+'%</span></div><div class="prog-bar-wrap"><div class="prog-bar" style="width:'+pct+'%"></div></div></div>';if(t.deadline)prog+='<div style="font-size:11px;color:var(--purple);margin-top:4px">'+formatDeadline(t.deadline)+'</div>';}
+    const c=CAT_COLORS[t.cat]||CAT_COLORS.Custom;
+    html+='<div class="tracker-summary-row"><div style="flex:1"><div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="font-size:13px;font-weight:600">'+t.name+'</span><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span></div><div style="font-size:12px;color:var(--text-muted)">'+twt.length+' entr'+(twt.length===1?'y':'ies')+' this week'+(twAvg!==null?' &middot; avg '+twAvg.toFixed(1)+' '+t.unit:'')+'</div>'+(ch?'<div style="margin-top:3px">'+ch+'</div>':'')+prog+'</div></div>';
+  });
+  if(!any)html+='<div class="no-data">No entries logged in the past two weeks.</div>';
+  html+='</div>';el.innerHTML=html;
+}
+
+// GRAPHS
+let activeChart=null,activeChartInst=null;
+function renderChartTabs(){
   const has=trackers.length>0;
   document.getElementById('graphs-empty').style.display=has?'none':'block';
   document.getElementById('graphs-content').style.display=has?'block':'none';
-  if(!has) return;
+  if(!has)return;
   document.getElementById('chart-tabs').innerHTML=trackers.map(t=>'<button class="chart-tab'+(t.id===activeChart?' active':'')+'" onclick="showChart(\''+t.id+'\')">'+t.name+'</button>').join('');
 }
-function showChart(tid) {
-  activeChart=tid; renderChartTabs();
+function showChart(tid){
+  activeChart=tid;renderChartTabs();
   const t=trackers.find(x=>x.id===tid);
   const entries=logs.filter(l=>l.tid===tid).sort((a,b)=>a.date.localeCompare(b.date));
   const card=document.getElementById('chart-card');
   if(!entries.length){card.innerHTML='<div class="no-data"><strong>No data for '+t.name+' yet</strong>Log some entries first.</div>';return;}
-  card.innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:2px">'+t.name+'</div><div style="font-size:12px;color:#888;margin-bottom:1rem">'+t.cat+' · '+t.unit+(t.target?' · Target: '+t.target+' '+t.unit:'')+(t.deadline?' · '+formatDeadline(t.deadline):'')+'</div><div style="position:relative;width:100%;height:220px"><canvas id="prog-chart"></canvas></div>';
-  if(activeChartInst) activeChartInst.destroy();
+  card.innerHTML='<div style="font-size:14px;font-weight:700;margin-bottom:2px">'+t.name+'</div><div style="font-size:12px;color:#888;margin-bottom:1rem">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target+' '+t.unit:'')+(t.deadline?' &middot; '+formatDeadline(t.deadline):'')+'</div><div style="position:relative;width:100%;height:220px"><canvas id="prog-chart"></canvas></div>';
+  if(activeChartInst)activeChartInst.destroy();
   const cfg={type:'line',data:{labels:entries.map(e=>e.date.slice(5)),datasets:[{label:t.name,data:entries.map(e=>e.val),borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',borderWidth:2.5,pointBackgroundColor:'#1D9E75',pointRadius:5,pointHoverRadius:7,fill:true,tension:0.35}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y+' '+t.unit}}},scales:{x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#aaa',font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#aaa',font:{size:11},callback:v=>v+' '+t.unit}}}}};
-  if(t.target) cfg.data.datasets.push({label:'Target',data:Array(entries.length).fill(t.target),borderColor:'#D85A30',borderDash:[5,5],borderWidth:1.5,pointRadius:0,fill:false});
+  if(t.target)cfg.data.datasets.push({label:'Target',data:Array(entries.length).fill(t.target),borderColor:'#D85A30',borderDash:[5,5],borderWidth:1.5,pointRadius:0,fill:false});
   activeChartInst=new Chart(document.getElementById('prog-chart'),cfg);
 }
 
-// ── Tracker CRUD ──────────────────────────────────────────
+// TRACKER CRUD
 let editingTrackerId=null;
 function openAddTracker(){editingTrackerId=null;document.getElementById('modal-title').textContent='New tracker';document.getElementById('modal-save-btn').textContent='Save';['t-name','t-unit','t-target','t-deadline'].forEach(id=>document.getElementById(id).value='');document.getElementById('t-cat').value='Strength';document.getElementById('t-dir').value='up';document.getElementById('tracker-modal').classList.add('open');}
 function openEditTracker(id){editingTrackerId=id;const t=trackers.find(x=>x.id===id);document.getElementById('modal-title').textContent='Edit tracker';document.getElementById('modal-save-btn').textContent='Update';document.getElementById('t-name').value=t.name;document.getElementById('t-cat').value=t.cat;document.getElementById('t-unit').value=t.unit;document.getElementById('t-target').value=t.target||'';document.getElementById('t-deadline').value=t.deadline||'';document.getElementById('t-dir').value=t.dir||'up';document.getElementById('tracker-modal').classList.add('open');}
 function closeModal(){document.getElementById('tracker-modal').classList.remove('open');}
-
 async function saveTracker(){
-  const name=document.getElementById('t-name').value.trim();
-  const unit=document.getElementById('t-unit').value.trim();
+  const name=document.getElementById('t-name').value.trim();const unit=document.getElementById('t-unit').value.trim();
   if(!name||!unit){alert('Please fill in a name and unit.');return;}
-  const tgt=document.getElementById('t-target').value;
-  const dl=document.getElementById('t-deadline').value;
+  const tgt=document.getElementById('t-target').value;const dl=document.getElementById('t-deadline').value;
   const obj={name,cat:document.getElementById('t-cat').value,unit,target:tgt?parseFloat(tgt):null,deadline:dl||null,dir:document.getElementById('t-dir').value};
   document.getElementById('modal-save-btn').disabled=true;
   if(editingTrackerId){
-    const {error}=await sb.from('trackers').update(obj).eq('id',editingTrackerId);
+    const{error}=await sb.from('trackers').update(obj).eq('id',editingTrackerId);
     if(error){alert('Error: '+error.message);document.getElementById('modal-save-btn').disabled=false;return;}
     const i=trackers.findIndex(x=>x.id===editingTrackerId);trackers[i]={...trackers[i],...obj};
-  } else {
-    const {data,error}=await sb.from('trackers').insert({...obj,user_id:currentUser.id}).select().single();
+  }else{
+    const{data,error}=await sb.from('trackers').insert({...obj,user_id:currentUser.id}).select().single();
     if(error){alert('Error: '+error.message);document.getElementById('modal-save-btn').disabled=false;return;}
     trackers.push({id:data.id,...obj});
   }
-  document.getElementById('modal-save-btn').disabled=false;
-  closeModal();showToast('✓ Tracker saved');renderAll();
+  document.getElementById('modal-save-btn').disabled=false;closeModal();showToast('Tracker saved');renderAll();
 }
-
 async function deleteTracker(id){
-  if(!confirm('Delete this tracker and all its logs?')) return;
-  const {error}=await sb.from('trackers').delete().eq('id',id);
+  if(!confirm('Delete this tracker and all its logs?'))return;
+  const{error}=await sb.from('trackers').delete().eq('id',id);
   if(error){alert('Error: '+error.message);return;}
-  trackers=trackers.filter(x=>x.id!==id);
-  logs=logs.filter(l=>l.tid!==id);
-  if(activeChart===id) activeChart=null;
-  showToast('🗑 Tracker deleted');renderAll();
+  trackers=trackers.filter(x=>x.id!==id);logs=logs.filter(l=>l.tid!==id);
+  if(activeChart===id)activeChart=null;showToast('Tracker deleted');renderAll();
 }
 
 let editingTargetId=null;
-function openTargetEdit(tid){editingTargetId=tid;const t=trackers.find(x=>x.id===tid);document.getElementById('tgt-modal-title').textContent='Edit target — '+t.name;document.getElementById('tgt-unit-label').textContent='Target ('+t.unit+')';document.getElementById('tgt-val').value=t.target||'';document.getElementById('tgt-deadline').value=t.deadline||'';document.getElementById('tgt-dir').value=t.dir||'up';document.getElementById('target-modal').classList.add('open');}
+function openTargetEdit(tid){editingTargetId=tid;const t=trackers.find(x=>x.id===tid);document.getElementById('tgt-modal-title').textContent='Edit target - '+t.name;document.getElementById('tgt-unit-label').textContent='Target ('+t.unit+')';document.getElementById('tgt-val').value=t.target||'';document.getElementById('tgt-deadline').value=t.deadline||'';document.getElementById('tgt-dir').value=t.dir||'up';document.getElementById('target-modal').classList.add('open');}
 function closeTargetModal(){document.getElementById('target-modal').classList.remove('open');}
 async function saveTarget(){
-  const i=trackers.findIndex(x=>x.id===editingTargetId);
-  const v=document.getElementById('tgt-val').value;
-  const dl=document.getElementById('tgt-deadline').value;
+  const i=trackers.findIndex(x=>x.id===editingTargetId);const v=document.getElementById('tgt-val').value;const dl=document.getElementById('tgt-deadline').value;
   const updates={target:v?parseFloat(v):null,deadline:dl||null,dir:document.getElementById('tgt-dir').value};
-  const {error}=await sb.from('trackers').update(updates).eq('id',editingTargetId);
+  const{error}=await sb.from('trackers').update(updates).eq('id',editingTargetId);
   if(error){alert('Error: '+error.message);return;}
-  trackers[i]={...trackers[i],...updates};
-  closeTargetModal();showToast('✓ Target saved');renderAll();
-  if(activeChart===editingTargetId) showChart(editingTargetId);
+  trackers[i]={...trackers[i],...updates};closeTargetModal();showToast('Target saved');renderAll();
+  if(activeChart===editingTargetId)showChart(editingTargetId);
 }
 
 function switchTab(tab,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');btn.classList.add('active');
-  if(tab==='graphs'){renderChartTabs();if(activeChart) showChart(activeChart);}
-  if(tab==='summary') renderSummary();
+  if(tab==='graphs'){renderChartTabs();if(activeChart)showChart(activeChart);}
+  if(tab==='summary')renderSummary();
 }
 
 function renderAll(){renderStreakBanner();renderMetrics();renderTrackersList();renderLog();renderRecentEntries();renderChartTabs();}
 
-// ── AI Coach ──────────────────────────────────────────────
-const systemPrompt=`You are FitCoach AI, an energetic and supportive personal fitness coach. You have access to the user's full tracker data including streaks, goals, deadlines, and recent progress. Be concise (2-4 sentences), specific, motivating, and data-driven. If there's no data yet, encourage the user to start logging and offer general tips.`;
-function buildContext(){
-  if(!trackers.length) return 'The user has no trackers set up yet.';
-  const streak=calcStreak();
-  let ctx=`User overall streak: ${streak} day${streak!==1?'s':''}\n\nTrackers:\n`;
-  trackers.forEach(t=>{
-    const entries=logs.filter(l=>l.tid===t.id).sort((a,b)=>a.date.localeCompare(b.date));
-    const latest=entries.length?entries[entries.length-1]:null;
-    const ts=calcTrackerStreak(t.id);
-    ctx+=`- ${t.name} (${t.cat}, ${t.unit}${t.target?', target: '+t.target:''}${t.deadline?', deadline: '+t.deadline+' ('+formatDeadline(t.deadline)+')':''}): latest = ${latest?latest.val+' '+t.unit+' on '+latest.date:'no data yet'}${ts>=2?', '+ts+'-day streak':''}\n`;
-    if(entries.length>1) ctx+=`  history: ${entries.slice(-5).map(e=>e.val+' ('+e.date+')').join(', ')}\n`;
-  });
+// AI COACH
+const sysPrompt='You are FitCoach AI, an energetic personal fitness coach. Be concise (2-4 sentences), specific, and motivating.';
+function buildCtx(){
+  if(!trackers.length)return 'No trackers set up yet.';
+  const s=calcStreak();let ctx='Overall streak: '+s+' day'+(s!==1?'s':'')+'\n';
+  trackers.forEach(t=>{const entries=logs.filter(l=>l.tid===t.id).sort((a,b)=>a.date.localeCompare(b.date));const latest=entries.length?entries[entries.length-1]:null;const ts=calcTrackerStreak(t.id);ctx+='- '+t.name+' ('+t.cat+', '+t.unit+(t.target?', target: '+t.target:'')+(t.deadline?', deadline: '+formatDeadline(t.deadline):'')+'): '+(latest?latest.val+' '+t.unit+' on '+latest.date:'no data')+(ts>=2?', '+ts+'-day streak':'')+'\n';if(entries.length>1)ctx+='  history: '+entries.slice(-5).map(e=>e.val+' ('+e.date+')').join(', ')+'\n';});
   return ctx;
 }
 let chatHistory=[];
-function appendMsg(text,isUser){const d2=document.createElement('div');d2.className=isUser?'user-msg':'ai-msg';d2.textContent=text;document.getElementById('ai-messages').appendChild(d2);d2.scrollIntoView({behavior:'smooth',block:'nearest'});}
-async function sendMsg(){const inp=document.getElementById('coach-input');const msg=inp.value.trim();if(!msg) return;inp.value='';appendMsg(msg,true);await callAI(msg);}
+function appendMsg(text,isUser){const d=document.createElement('div');d.className=isUser?'user-msg':'ai-msg';d.textContent=text;document.getElementById('ai-messages').appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'});}
+async function sendMsg(){const inp=document.getElementById('coach-input');const msg=inp.value.trim();if(!msg)return;inp.value='';appendMsg(msg,true);await callAI(msg);}
 async function sendQuick(p){appendMsg(p,true);await callAI(p);}
-function appendTyping(){const d2=document.createElement('div');d2.className='ai-msg';d2.id='typing-indicator';d2.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';document.getElementById('ai-messages').appendChild(d2);d2.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function appendTyping(){const d=document.createElement('div');d.className='ai-msg';d.id='typing-indicator';d.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';document.getElementById('ai-messages').appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'});}
 async function callAI(msg){
   appendTyping();chatHistory.push({role:'user',content:msg});
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:systemPrompt+'\n\n'+buildContext(),messages:chatHistory})});
-    const data=await res.json();
-    const reply=data.content?.[0]?.text||'Something went wrong.';
+    const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer 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','HTTP-Referer':'https://zerbydog.github.io/Fitcoach/','X-Title':'FitCoach AI'},body:JSON.stringify({model:'poolside/laguna-m.1:free',messages:[{role:'system',content:sysPrompt+'\n\n'+buildCtx()},...chatHistory]})});
+    const data=await res.json();console.log('OpenRouter response:', JSON.stringify(data));const reply=data.choices?.[0]?.message?.content||(data.error?'Error: '+data.error.message:'Something went wrong.');
     document.getElementById('typing-indicator').remove();appendMsg(reply,false);chatHistory.push({role:'assistant',content:reply});
   }catch(e){const el=document.getElementById('typing-indicator');if(el)el.remove();appendMsg('Connection error. Please try again.',false);chatHistory.pop();}
 }
@@ -775,7 +650,6 @@ function renderQuickPrompts(){
   document.getElementById('qp-row').innerHTML=qps.map(q=>'<button class="qp-btn" onclick="sendQuick(\''+q+'\')">'+q+'</button>').join('');
 }
 
-// ── Start ─────────────────────────────────────────────────
 init();
 </script>
 </body>

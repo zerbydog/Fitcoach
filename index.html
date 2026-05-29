@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -473,6 +474,8 @@ body.dark .rest-btn{color:#fde68a}
         <option value="percent">Highest % improvement</option>
         <option value="absolute_up">Highest number wins</option>
         <option value="absolute_down">Lowest number wins</option>
+        <option value="biggest_gain">Biggest gain (most increase)</option>
+        <option value="biggest_loss">Biggest loss (most decrease)</option>
       </select>
     </div>
     <div class="modal-row"><label>Your starting value</label><input id="ch-start" type="number" placeholder="e.g. 185" step="any"/></div>
@@ -948,7 +951,7 @@ function switchTab(tab,btn){
 }
 
 // FRIENDS & CHALLENGES
-let friends=[],pendingReceived=[],pendingSent=[],challenges=[],challengeLogs=[],friendProfiles={};
+let friends=[],pendingReceived=[],pendingSent=[],challenges=[],challengeLogs=[],friendProfiles={},challengeLogsCache={};
 let viewingFriendId=null,challengingFriendId=null,loggingChallengeId=null;
 
 async function loadFriendsData(){
@@ -1133,7 +1136,7 @@ async function saveChallenge(){
   const endDate=document.getElementById('ch-end-date').value;
   if(!name||!unit||isNaN(startVal)||!startDate||!endDate){alert('Please fill in all fields.');return;}
   if(new Date(endDate)<=new Date(startDate)){alert('End date must be after start date.');return;}
-  const direction=metric==='absolute_down'?'down':'up';
+  const direction=(metric==='absolute_down'||metric==='biggest_loss')?'down':'up';
   const btn=document.getElementById('ch-save-btn');btn.disabled=true;btn.textContent='Sending...';
   const{data,error}=await sb.from('challenges').insert({
     creator_id:currentUser.id,opponent_id:opponent,name,metric,direction,unit,
@@ -1196,6 +1199,8 @@ function calcProgress(c,userId){
     if(startVal===0)return 0;
     return((current-startVal)/Math.abs(startVal))*100;
   }
+  if(c.metric==='biggest_gain')return current-startVal;
+  if(c.metric==='biggest_loss')return startVal-current;
   return current;
 }
 
@@ -1236,12 +1241,18 @@ function renderChallenges(){
       const isPercent=ch.metric==='percent';
       const myStart=isCreator?ch.creator_start:ch.opponent_start;
       const theirStart=isCreator?ch.opponent_start:ch.creator_start;
-      const fmt=v=>v!==null?(isPercent?(v>=0?'+':'')+v.toFixed(1)+'%':v+' '+ch.unit):'No logs yet';
+      const isBiggestGain=ch.metric==='biggest_gain';const isBiggestLoss=ch.metric==='biggest_loss';
+      const fmt=v=>{
+        if(v===null)return 'No logs yet';
+        if(isPercent)return (v>=0?'+':'')+v.toFixed(1)+'%';
+        if(isBiggestGain||isBiggestLoss)return (v>=0?'+':'')+v.toFixed(1)+' '+ch.unit+' change';
+        return v+' '+ch.unit;
+      };
       const fmtStart=v=>v!==null?'started: '+v+' '+ch.unit:'waiting...';
       let whoLeading='',barYou=50,barThem=50;
       if(myProg!==null&&theirProg!==null){
-        const myN=isPercent?myProg:(ch.direction==='up'?myProg:-myProg);
-        const theirN=isPercent?theirProg:(ch.direction==='up'?theirProg:-theirProg);
+        const myN=myProg;
+        const theirN=theirProg;
         const total=Math.abs(myN)+Math.abs(theirN)||1;
         barYou=Math.round((Math.max(0,myN+total/2)/(total))*60+20);
         barThem=100-barYou;
@@ -1258,7 +1269,14 @@ function renderChallenges(){
         +(myProg!==null||theirProg!==null?'<div class="challenge-bar-wrap"><div class="challenge-bar-you" style="width:'+barYou+'%"></div><div class="challenge-bar-them" style="width:'+barThem+'%"></div></div>':'')
         +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">'+whoLeading;
       const logBtn=document.createElement('button');logBtn.className='green-btn';logBtn.style.cssText='font-size:12px;padding:6px 12px';logBtn.textContent='Log progress';logBtn.onclick=()=>openChallengeLog(ch.id);
-      card.appendChild(logBtn);el.appendChild(card);
+      card.appendChild(logBtn);
+      // Mini progress chart
+      const chartWrap=document.createElement('div');chartWrap.style.cssText='position:relative;width:100%;height:160px;margin-top:12px';
+      const canvas=document.createElement('canvas');canvas.id='challenge-chart-'+ch.id;
+      chartWrap.appendChild(canvas);card.appendChild(chartWrap);
+      el.appendChild(card);
+      // Build chart data
+      setTimeout(()=>renderChallengeChart(ch,currentUser.id,oppId,oppEmail),50);
     });
   }
 
@@ -1375,6 +1393,82 @@ async function showFriendChart(tid,fid){
   if(t.target)datasets.push({label:'Target',data:Array(points.length).fill(t.target),borderColor:'#7c3aed',borderDash:[5,5],borderWidth:1.5,pointRadius:0,fill:false});
   const cfg={type:'line',data:{labels:points.map(p=>p.label),datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.parsed.y.toFixed(1)+' '+t.unit}}},scales:{x:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},maxTicksLimit:8}},y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:11},callback:v=>v+' '+t.unit}}}}};
   activeChartInst=new Chart(document.getElementById('prog-chart'),cfg);
+}
+
+// CHALLENGE PROGRESS CHART
+const challengeChartInstances={};
+
+async function renderChallengeChart(ch,myId,oppId,oppEmail){
+  const canvasId='challenge-chart-'+ch.id;
+  const canvas=document.getElementById(canvasId);
+  if(!canvas)return;
+
+  // Get all logs for this challenge from both players
+  const myLogs=challengeLogs.filter(l=>l.challenge_id===ch.id&&l.user_id===myId).sort((a,b)=>a.date.localeCompare(b.date));
+  // Fetch opponent logs if not already cached
+  if(!challengeLogsCache){challengeLogsCache={};}
+  let oppLogs=challengeLogs.filter(l=>l.challenge_id===ch.id&&l.user_id===oppId).sort((a,b)=>a.date.localeCompare(b.date));
+
+  if(!myLogs.length&&!oppLogs.length){
+    canvas.parentElement.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">No progress logged yet — be the first!</div>';
+    return;
+  }
+
+  // Build date range from start_date to today or end_date
+  const start=new Date(ch.start_date);
+  const end=new Date(Math.min(new Date(ch.end_date),new Date()));
+  const dates=[];
+  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+    dates.push(d.toISOString().slice(0,10));
+  }
+
+  // For each date get the latest logged value (or null)
+  function getValForDate(logs,date){
+    const entry=logs.filter(l=>l.date<=date).sort((a,b)=>b.date.localeCompare(a.date))[0];
+    return entry?entry.val:null;
+  }
+
+  // Convert to progress values
+  const isPercent=ch.metric==='percent';
+  const isBiggestGain=ch.metric==='biggest_gain';
+  const isBiggestLoss=ch.metric==='biggest_loss';
+  const myStart=ch.creator_id===myId?ch.creator_start:ch.opponent_start;
+  const oppStart=ch.creator_id===myId?ch.opponent_start:ch.creator_start;
+
+  function toProgress(val,startVal,metric){
+    if(val===null||startVal===null)return null;
+    if(isPercent)return startVal===0?0:((val-startVal)/Math.abs(startVal))*100;
+    if(isBiggestGain)return val-startVal;
+    if(isBiggestLoss)return startVal-val;
+    return val;
+  }
+
+  const myData=dates.map(d=>{const v=getValForDate(myLogs,d);return toProgress(v,myStart,ch.metric);});
+  const oppData=dates.map(d=>{const v=getValForDate(oppLogs,d);return toProgress(v,oppStart,ch.metric);});
+
+  const labels=dates.map(d=>d.slice(5));
+  const isDark=document.body.classList.contains('dark');
+  const gridColor=isDark?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.05)';
+  const tickColor=isDark?'#6b7280':'#aaa';
+
+  if(challengeChartInstances[ch.id])challengeChartInstances[ch.id].destroy();
+
+  const unit=isPercent?'%':(isBiggestGain||isBiggestLoss?ch.unit+' chg':ch.unit);
+  const datasets=[];
+  if(myData.some(v=>v!==null))datasets.push({label:'You',data:myData,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#1D9E75',fill:false,tension:0.3,spanGaps:true});
+  if(oppData.some(v=>v!==null))datasets.push({label:oppEmail.split('@')[0],data:oppData,borderColor:'#D85A30',backgroundColor:'rgba(216,90,48,0.08)',borderWidth:2,pointRadius:3,pointBackgroundColor:'#D85A30',fill:false,tension:0.3,spanGaps:true});
+
+  if(!datasets.length){canvas.parentElement.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">No progress logged yet.</div>';return;}
+
+  challengeChartInstances[ch.id]=new Chart(canvas,{
+    type:'line',
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{font:{size:11},color:tickColor,boxWidth:16}},
+        tooltip:{callbacks:{label:ctx=>(ctx.dataset.label||'')+': '+(ctx.parsed.y!==null?(isPercent?(ctx.parsed.y>=0?'+':'')+ctx.parsed.y.toFixed(1)+'%':ctx.parsed.y.toFixed(1)+' '+ch.unit):'-')}}},
+      scales:{x:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},maxTicksLimit:7}},
+        y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},callback:v=>isPercent?(v>=0?'+':'')+v.toFixed(1)+'%':v+' '+ch.unit}}}}
+  });
 }
 
 function renderAll(){renderStreakBanner();renderMetrics();renderTrackersList();renderLog();renderRecentEntries();renderChartTabs();updateRestDayBtn();}

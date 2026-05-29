@@ -223,6 +223,29 @@ body.dark .rest-btn{color:#fde68a}
 .unit-toggle{display:flex;background:var(--bg);border-radius:8px;padding:3px;gap:3px}
 .unit-btn{flex:1;padding:6px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-muted);transition:all .15s}
 .unit-btn.active{background:var(--card-bg);color:var(--green);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+.folder-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.folder-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none}
+.folder-header:hover{background:var(--bg)}
+.folder-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
+.folder-icon{font-size:1.2rem}
+.folder-count{font-size:12px;color:var(--text-muted);margin-left:4px}
+.folder-chevron{font-size:12px;color:var(--text-muted);transition:transform .2s}
+.folder-chevron.open{transform:rotate(90deg)}
+.folder-items{display:none;border-top:1px solid var(--border-soft)}
+.folder-items.open{display:block}
+.library-item{padding:12px 16px;border-bottom:1px solid var(--border-soft)}
+.library-item:last-child{border-bottom:none}
+.library-item-title{font-size:13px;font-weight:600;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between}
+.library-item-preview{font-size:12px;color:var(--text-muted);line-height:1.5;overflow:hidden;max-height:40px;transition:max-height .3s}
+.library-item-preview.expanded{max-height:600px}
+.library-item-actions{display:flex;gap:6px;margin-top:6px}
+.save-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.save-modal-overlay.open{display:flex}
+.save-modal-sheet{background:var(--card-bg);border-radius:16px 16px 0 0;padding:1.25rem;width:100%;max-width:500px;border-top:1px solid var(--border)}
+.save-sheet-title{font-size:15px;font-weight:700;margin-bottom:1rem}
+.folder-pick-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg);cursor:pointer;width:100%;font-family:inherit;font-size:13px;color:var(--text);margin-bottom:8px;transition:background .15s}
+.folder-pick-btn:hover{background:var(--bg)}
 </style>
 </head>
 <body>
@@ -378,11 +401,11 @@ body.dark .rest-btn{color:#fde68a}
 
 <div class="nav">
   <button class="nav-btn active" onclick="switchTab('log',this)">&#128203; Log</button>
-  <button class="nav-btn" onclick="switchTab('todo',this)">&#9989; To-Do</button>
   <button class="nav-btn" onclick="switchTab('summary',this)">&#128202; Summary</button>
   <button class="nav-btn" onclick="switchTab('graphs',this)">&#128200; Graphs</button>
   <button class="nav-btn" onclick="switchTab('trackers',this)">&#9881;&#65039; Trackers</button>
   <button class="nav-btn" onclick="switchTab('friends',this)" id="friends-nav-btn">&#128101; Friends</button>
+  <button class="nav-btn" onclick="switchTab('library',this)">&#128218; Library</button>
   <button class="nav-btn" onclick="switchTab('profile',this)">&#128100; Profile</button>
   <button class="nav-btn" onclick="switchTab('coach',this)">&#129302; Coach</button>
 </div>
@@ -411,10 +434,19 @@ body.dark .rest-btn{color:#fde68a}
   </div>
 </div>
 
-<!-- TODO -->
+<!-- TODO (hidden, used by dashboard) -->
 <div id="tab-todo" class="tab">
   <div class="sec-title">Not logged today</div>
   <div id="todo-content"></div>
+</div>
+
+<!-- LIBRARY -->
+<div id="tab-library" class="tab">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div class="sec-title" style="margin-bottom:0">Library</div>
+    <button class="green-btn" onclick="openNewFolder()">+ New folder</button>
+  </div>
+  <div id="library-content"></div>
 </div>
 
 <!-- SUMMARY -->
@@ -594,6 +626,32 @@ body.dark .rest-btn{color:#fde68a}
 </div>
 
 
+<!-- New folder modal -->
+<div class="overlay" id="new-folder-modal">
+  <div class="modal">
+    <div class="modal-title" id="folder-modal-title">New folder</div>
+    <div class="modal-row"><label>Folder name</label><input id="folder-name-input" placeholder="e.g. Workouts, Recipes, Motivation"/></div>
+    <div class="modal-row"><label>Icon (emoji)</label><input id="folder-icon-input" placeholder="e.g. &#127939; &#127859; &#128170;" maxlength="4"/></div>
+    <div class="modal-btns">
+      <button class="ghost-btn" onclick="closeFolderModal()">Cancel</button>
+      <button class="green-btn" onclick="saveFolder()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit item modal -->
+<div class="overlay" id="edit-item-modal">
+  <div class="modal" style="width:380px">
+    <div class="modal-title">Edit saved item</div>
+    <div class="modal-row"><label>Title</label><input id="edit-item-title" placeholder="Give this a title"/></div>
+    <div class="modal-row"><label>Move to folder</label><select id="edit-item-folder"></select></div>
+    <div class="modal-btns">
+      <button class="ghost-btn" onclick="closeEditItem()">Cancel</button>
+      <button class="green-btn" onclick="saveEditItem()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Friend tracker modal -->
 <div class="overlay" id="friend-trackers-modal">
   <div class="modal" style="width:380px">
@@ -641,6 +699,18 @@ body.dark .rest-btn{color:#fde68a}
       <button class="ghost-btn" onclick="document.getElementById('challenge-log-modal').classList.remove('open')">Cancel</button>
       <button class="green-btn" onclick="saveChallengeLog()">Log it</button>
     </div>
+  </div>
+</div>
+
+
+<!-- Save to library sheet -->
+<div class="save-modal-overlay" id="save-modal-overlay">
+  <div class="save-modal-sheet">
+    <div class="save-sheet-title">Save to library</div>
+    <div class="modal-row"><label>Title (optional)</label><input id="save-item-title" placeholder="e.g. Push day workout"/></div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:600">Choose a folder</div>
+    <div id="folder-pick-list"></div>
+    <button class="ghost-btn" style="width:100%;justify-content:center;margin-top:8px" onclick="closeSaveModal()">Cancel</button>
   </div>
 </div>
 
@@ -743,6 +813,7 @@ async function loadData(){
   logs=(lData||[]).map(l=>({id:l.id,tid:l.tracker_id,val:l.val,note:l.note||'',date:l.date}));
   restDays=(rData||[]).map(r=>r.date);
   await loadFriendsData();
+  await loadLibrary().catch(()=>{});
 }
 function showToast(msg){const t=document.getElementById('save-toast');t.textContent=msg||'Saved';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
 
@@ -820,7 +891,16 @@ function renderMetrics(){
     const dl=t.deadline?'<div class="metric-deadline">'+formatDeadline(t.deadline)+'</div>':'';
     const streak=calcTrackerStreak(t.id);const sb2=streak>=2?'<div class="metric-streak">&#128293; '+streak+' day streak</div>':'';
     const prBadge=isPR?'<div class="pr-badge">&#127942; PR</div>':'';
-    g.innerHTML+='<div class="metric-card'+(isPR?' pr-card':'')+'" onclick="openTargetEdit(\''+t.id+'\')" title="Click to edit target"><div class="metric-label"><span class="metric-dot" style="background:'+c.text+'"></span>'+t.name+'</div><div class="metric-value">'+(val!=null?val:'&mdash;')+' <span class="metric-unit">'+t.unit+'</span></div>'+(t.logtype==='cumulative'?'<div style="font-size:10px;color:var(--text-light)">today\'s total</div>':'')+tgt+(delta||'')+dl+sb2+prBadge+'</div>';
+    const loggedToday=logs.some(l=>l.tid===t.id&&l.date===todayStr());
+    const isRest=restDays.includes(todayStr());
+    const unloggedDot=(!loggedToday&&!isRest)?'<span style="position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:#ef4444;border:2px solid var(--card-bg)" title="Not logged today"></span>':'';
+    const cardClass='metric-card'+(isPR?' pr-card':'');
+    const cardTitle=loggedToday||isRest?'Click to edit target':'Not logged today - click to log';
+    const card=document.createElement('div');
+    card.className=cardClass;card.style.position='relative';card.title=cardTitle;
+    card.onclick=()=>quickLogFromDash(t.id);
+    card.innerHTML='<div class="metric-label"><span class="metric-dot" style="background:'+c.text+'"></span>'+t.name+'</div><div class="metric-value">'+(val!=null?val:'&mdash;')+' <span class="metric-unit">'+t.unit+'</span></div>'+(t.logtype==='cumulative'?'<div style="font-size:10px;color:var(--text-light)">today\'s total</div>':'')+tgt+(delta||'')+dl+sb2+prBadge+unloggedDot;
+    g.appendChild(card);
   });
 }
 
@@ -1099,8 +1179,161 @@ function switchTab(tab,btn){
   if(tab==='todo')renderTodo();
   if(tab==='friends')renderFriendsTab();
   if(tab==='profile')renderProfile();
+  if(tab==='library')renderLibrary();
 }
 
+
+
+// LIBRARY
+let libraryFolders=[];let libraryItems=[];
+let savingText='';let editingFolderId=null;let editingItemId=null;
+
+async function loadLibrary(){
+  const[{data:fData},{data:iData}]=await Promise.all([
+    sb.from('library_folders').select('*').order('created_at'),
+    sb.from('library_items').select('*').order('created_at',{ascending:false})
+  ]);
+  libraryFolders=fData||[];
+  libraryItems=iData||[];
+}
+
+function renderLibrary(){
+  const el=document.getElementById('library-content');
+  if(!libraryFolders.length){
+    el.innerHTML='<div class="card empty-state"><div class="icon">&#128218;</div><h3>No folders yet</h3><p>Create folders to organize saved workouts, recipes, and coach advice. Hit the save icon on any AI coach message to get started.</p></div>';
+    return;
+  }
+  el.innerHTML='';
+  // Uncategorized items
+  const uncatItems=libraryItems.filter(i=>!i.folder_id);
+  if(uncatItems.length){
+    const card=buildFolderCard('uncategorized','&#128196;','Uncategorized',uncatItems);
+    el.appendChild(card);
+  }
+  libraryFolders.forEach(f=>{
+    const items=libraryItems.filter(i=>i.folder_id===f.id);
+    const card=buildFolderCard(f.id,f.icon||'&#128218;',f.name,items,f);
+    el.appendChild(card);
+  });
+}
+
+function buildFolderCard(id,icon,name,items,folderObj){
+  const card=document.createElement('div');card.className='folder-card';
+  const header=document.createElement('div');header.className='folder-header';
+  const titleDiv=document.createElement('div');titleDiv.className='folder-title';
+  titleDiv.innerHTML='<span class="folder-icon">'+icon+'</span>'+name+'<span class="folder-count">'+items.length+'</span>';
+  const actDiv=document.createElement('div');actDiv.style.cssText='display:flex;align-items:center;gap:8px';
+  if(folderObj){
+    const eb=document.createElement('button');eb.className='edit-btn';eb.style.cssText='font-size:11px;padding:3px 7px';eb.textContent='Edit';eb.onclick=(e)=>{e.stopPropagation();openEditFolder(id);};
+    const db=document.createElement('button');db.className='del-btn';db.innerHTML='&#128465;';db.onclick=(e)=>{e.stopPropagation();deleteFolder(id);};
+    actDiv.appendChild(eb);actDiv.appendChild(db);
+  }
+  const chev=document.createElement('span');chev.className='folder-chevron';chev.innerHTML='&#9658;';
+  actDiv.appendChild(chev);
+  header.appendChild(titleDiv);header.appendChild(actDiv);
+  const itemsDiv=document.createElement('div');itemsDiv.className='folder-items';
+  if(!items.length){
+    const empty=document.createElement('div');empty.style.cssText='padding:12px 16px;font-size:13px;color:var(--text-muted)';empty.textContent='No items yet.';itemsDiv.appendChild(empty);
+  } else {
+    items.forEach(item=>{
+      const div=buildItemEl(item);itemsDiv.appendChild(div);
+    });
+  }
+  header.onclick=()=>{
+    const isOpen=itemsDiv.classList.toggle('open');
+    header.querySelector('.folder-chevron').classList.toggle('open',isOpen);
+  };
+  card.appendChild(header);card.appendChild(itemsDiv);
+  return card;
+}
+
+function buildItemEl(item){
+  const div=document.createElement('div');div.className='library-item';
+  const titleRow=document.createElement('div');titleRow.className='library-item-title';
+  const titleSpan=document.createElement('span');titleSpan.textContent=item.title||'Saved item';
+  const dateSpan=document.createElement('span');dateSpan.style.cssText='font-size:11px;color:var(--text-muted);font-weight:400';dateSpan.textContent=item.created_at?item.created_at.slice(0,10):'';
+  titleRow.appendChild(titleSpan);titleRow.appendChild(dateSpan);
+  const preview=document.createElement('div');preview.className='library-item-preview';preview.textContent=item.content;
+  const actions=document.createElement('div');actions.className='library-item-actions';
+  const expandBtn=document.createElement('button');expandBtn.className='ghost-btn';expandBtn.style.cssText='font-size:11px;padding:3px 8px';expandBtn.textContent='Show more';
+  expandBtn.onclick=()=>{const exp=preview.classList.toggle('expanded');expandBtn.textContent=exp?'Show less':'Show more';};
+  const editBtn=document.createElement('button');editBtn.className='ghost-btn';editBtn.style.cssText='font-size:11px;padding:3px 8px';editBtn.textContent='Edit';editBtn.onclick=()=>openEditItem(item.id);
+  const delBtn=document.createElement('button');delBtn.className='del-btn';delBtn.innerHTML='&#128465;';delBtn.onclick=()=>deleteItem(item.id);
+  actions.appendChild(expandBtn);actions.appendChild(editBtn);actions.appendChild(delBtn);
+  div.appendChild(titleRow);div.appendChild(preview);div.appendChild(actions);
+  return div;
+}
+
+// FOLDER CRUD
+function openNewFolder(){editingFolderId=null;document.getElementById('folder-modal-title').textContent='New folder';document.getElementById('folder-name-input').value='';document.getElementById('folder-icon-input').value='';document.getElementById('new-folder-modal').classList.add('open');}
+function openEditFolder(id){editingFolderId=id;const f=libraryFolders.find(x=>x.id===id);document.getElementById('folder-modal-title').textContent='Edit folder';document.getElementById('folder-name-input').value=f.name;document.getElementById('folder-icon-input').value=f.icon||'';document.getElementById('new-folder-modal').classList.add('open');}
+function closeFolderModal(){document.getElementById('new-folder-modal').classList.remove('open');}
+async function saveFolder(){
+  const name=document.getElementById('folder-name-input').value.trim();
+  const icon=document.getElementById('folder-icon-input').value.trim()||'&#128218;';
+  if(!name){alert('Please enter a folder name.');return;}
+  if(editingFolderId){
+    const{error}=await sb.from('library_folders').update({name,icon}).eq('id',editingFolderId);
+    if(error){alert('Error: '+error.message);return;}
+    const i=libraryFolders.findIndex(x=>x.id===editingFolderId);libraryFolders[i]={...libraryFolders[i],name,icon};
+  } else {
+    const{data,error}=await sb.from('library_folders').insert({user_id:currentUser.id,name,icon}).select().single();
+    if(error){alert('Error: '+error.message);return;}
+    libraryFolders.push(data);
+  }
+  closeFolderModal();showToast('Folder saved');renderLibrary();
+}
+async function deleteFolder(id){
+  if(!confirm('Delete this folder? Items inside will become uncategorized.'))return;
+  await sb.from('library_items').update({folder_id:null}).eq('folder_id',id);
+  await sb.from('library_folders').delete().eq('id',id);
+  libraryFolders=libraryFolders.filter(x=>x.id!==id);libraryItems=libraryItems.map(i=>i.folder_id===id?{...i,folder_id:null}:i);
+  showToast('Folder deleted');renderLibrary();
+}
+
+// ITEM CRUD
+function openSaveToLibrary(text){
+  savingText=text;
+  document.getElementById('save-item-title').value='';
+  const list=document.getElementById('folder-pick-list');
+  list.innerHTML='';
+  // Uncategorized option
+  const unc=document.createElement('button');unc.className='folder-pick-btn';unc.innerHTML='&#128196; Uncategorized';unc.onclick=()=>confirmSaveItem(null);list.appendChild(unc);
+  libraryFolders.forEach(f=>{
+    const btn=document.createElement('button');btn.className='folder-pick-btn';btn.innerHTML=(f.icon||'&#128218;')+' '+f.name;btn.onclick=()=>confirmSaveItem(f.id);list.appendChild(btn);
+  });
+  document.getElementById('save-modal-overlay').classList.add('open');
+}
+function closeSaveModal(){document.getElementById('save-modal-overlay').classList.remove('open');}
+async function confirmSaveItem(folderId){
+  const title=document.getElementById('save-item-title').value.trim()||null;
+  const{data,error}=await sb.from('library_items').insert({user_id:currentUser.id,folder_id:folderId,title,content:savingText}).select().single();
+  if(error){alert('Error: '+error.message);return;}
+  libraryItems.unshift(data);
+  closeSaveModal();showToast('Saved to library!');
+}
+
+function openEditItem(id){
+  editingItemId=id;const item=libraryItems.find(x=>x.id===id);
+  document.getElementById('edit-item-title').value=item.title||'';
+  const sel=document.getElementById('edit-item-folder');
+  sel.innerHTML='<option value="">Uncategorized</option>'+libraryFolders.map(f=>'<option value="'+f.id+'"'+(item.folder_id===f.id?' selected':'')+'>'+f.name+'</option>').join('');
+  document.getElementById('edit-item-modal').classList.add('open');
+}
+function closeEditItem(){document.getElementById('edit-item-modal').classList.remove('open');}
+async function saveEditItem(){
+  const title=document.getElementById('edit-item-title').value.trim()||null;
+  const folderId=document.getElementById('edit-item-folder').value||null;
+  const{error}=await sb.from('library_items').update({title,folder_id:folderId}).eq('id',editingItemId);
+  if(error){alert('Error: '+error.message);return;}
+  const i=libraryItems.findIndex(x=>x.id===editingItemId);libraryItems[i]={...libraryItems[i],title,folder_id:folderId};
+  closeEditItem();showToast('Item updated');renderLibrary();
+}
+async function deleteItem(id){
+  if(!confirm('Delete this saved item?'))return;
+  await sb.from('library_items').delete().eq('id',id);
+  libraryItems=libraryItems.filter(x=>x.id!==id);showToast('Item deleted');renderLibrary();
+}
 
 // ONBOARDING & PROFILE
 let userProfile={};
@@ -1820,6 +2053,20 @@ async function renderChallengeChart(ch,myId,oppId,oppEmail){
   });
 }
 
+
+function quickLogFromDash(tid){
+  const loggedToday=logs.some(l=>l.tid===tid&&l.date===todayStr());
+  const isRest=restDays.includes(todayStr());
+  if(loggedToday||isRest){
+    openTargetEdit(tid);
+  } else {
+    switchTab('log',document.querySelectorAll('.nav-btn')[0]);
+    document.getElementById('log-tracker').value=tid;
+    updateLogFields();
+    document.getElementById('log-val').focus();
+  }
+}
+
 function renderAll(){renderStreakBanner();renderMetrics();renderTrackersList();renderLog();renderRecentEntries();renderChartTabs();updateRestDayBtn();}
 
 // AI COACH
@@ -1836,7 +2083,22 @@ function buildCtx(){
   return ctx;
 }
 let chatHistory=[];
-function appendMsg(text,isUser){const d=document.createElement('div');d.className=isUser?'user-msg':'ai-msg';d.textContent=text;document.getElementById('ai-messages').appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'});}
+function appendMsg(text,isUser){
+  const wrap=document.createElement('div');wrap.style.position='relative';
+  const d=document.createElement('div');d.className=isUser?'user-msg':'ai-msg';d.textContent=text;
+  wrap.appendChild(d);
+  if(!isUser){
+    const saveBtn=document.createElement('button');
+    saveBtn.style.cssText='position:absolute;top:6px;right:6px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-light);opacity:0;transition:opacity .2s;padding:2px';
+    saveBtn.innerHTML='&#128190;';saveBtn.title='Save to library';
+    saveBtn.onclick=()=>openSaveToLibrary(text);
+    wrap.addEventListener('mouseenter',()=>saveBtn.style.opacity='1');
+    wrap.addEventListener('mouseleave',()=>saveBtn.style.opacity='0');
+    wrap.appendChild(saveBtn);
+  }
+  document.getElementById('ai-messages').appendChild(wrap);
+  wrap.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 async function sendMsg(){const inp=document.getElementById('coach-input');const msg=inp.value.trim();if(!msg)return;inp.value='';appendMsg(msg,true);await callAI(msg);}
 async function sendQuick(p){appendMsg(p,true);await callAI(p);}
 function appendTyping(){const d=document.createElement('div');d.className='ai-msg';d.id='typing-indicator';d.innerHTML='<div class="loading-dots"><span></span><span></span><span></span></div>';document.getElementById('ai-messages').appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'});}

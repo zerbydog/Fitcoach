@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -671,8 +672,10 @@ function renderTrackersList(){
   el.innerHTML=trackers.map((t,i)=>{
     const c=getCatColor(t.cat);const dl=t.deadline?'<div style="font-size:11px;color:var(--purple);margin-top:2px">'+formatDeadline(t.deadline)+'</div>':'';
     const lt=t.logtype==='cumulative'?'<span style="font-size:10px;background:var(--green-light);color:var(--green);border-radius:4px;padding:1px 5px;margin-left:4px">daily total</span>':'';
-    return '<div class="tracker-item" draggable="true" data-id="'+t.id+'" data-idx="'+i+'" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)" ondragleave="dragLeave(event)"><div class="drag-handle" title="Drag to reorder">&#8597;</div><div style="flex:1"><div class="tracker-name">'+t.name+lt+'</div><div class="tracker-cat">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target:'')+'</div>'+dl+'</div><div style="display:flex;align-items:center;gap:8px"><span class="badge" style="background:'+c.bg+';color:'+c.text+'">'+t.cat+'</span><button class="edit-btn" onclick="openEditTracker(\''+t.id+'\')">Edit</button><button class="del-btn" onclick="deleteTracker(\''+t.id+'\')">&#128465;</button></div></div>';
-  }).join('');
+    const isPub=t.visibility==='public';
+    const visBtn='<button class="ghost-btn" style="font-size:11px;padding:4px 8px;'+(isPub?'background:var(--green-light);color:var(--green)':'background:var(--summary-stat-bg);color:var(--text-muted)')+'" onclick="toggleVisibility(\''+t.id+'\')">'+( isPub?'&#127760; Public':'&#128274; Private')+'</button>';
+    return '<div class="tracker-item" draggable="true" data-id="'+t.id+'" data-idx="'+i+'" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)" ondragleave="dragLeave(event)"><div class="drag-handle" title="Drag to reorder">&#8597;</div><div style="flex:1"><div class="tracker-name">'+t.name+lt+'</div><div class="tracker-cat">'+t.cat+' &middot; '+t.unit+(t.target?' &middot; Target: '+t.target:'')+'</div>'+dl+'</div><div style="display:flex;align-items:center;gap:6px">'+visBtn+'<button class="edit-btn" onclick="openEditTracker(\''+t.id+'\')">Edit</button><button class="del-btn" onclick="deleteTracker(\''+t.id+'\')">&#128465;</button></div></div>';
+  }).join('');;
 }
 
 // DRAG TO REORDER
@@ -1083,7 +1086,7 @@ async function viewFriendTrackers(fid){
   document.getElementById('ft-modal-content').innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:1rem 0">Loading...</div>';
   document.getElementById('friend-trackers-modal').classList.add('open');
   // Fetch their public trackers — we do this via a separate query (RLS allows reading all trackers for now; in future add visibility field)
-  const{data}=await sb.from('trackers').select('*').eq('user_id',fid);
+  const{data}=await sb.from('trackers').select('*').eq('user_id',fid).eq('visibility','public');
   const fTrackers=data||[];
   if(!fTrackers.length){document.getElementById('ft-modal-content').innerHTML='<div style="font-size:13px;color:var(--text-muted);padding:1rem 0">This friend has no public trackers yet.</div>';return;}
   document.getElementById('ft-modal-content').innerHTML=fTrackers.map(t=>{
@@ -1289,6 +1292,17 @@ function renderFriendsTab(){
     banner.style.display='block';
     document.getElementById('pending-challenges-list').innerHTML=pendingIn.map(c=>'<div style="font-size:13px;margin-bottom:6px">&#9876;&#65039; <strong>'+getFriendEmail(c.creator_id)+'</strong> challenged you: <strong>'+c.name+'</strong></div>').join('');
   } else banner.style.display='none';
+}
+
+
+async function toggleVisibility(id){
+  const i=trackers.findIndex(x=>x.id===id);
+  const newVis=trackers[i].visibility==='public'?'private':'public';
+  const{error}=await sb.from('trackers').update({visibility:newVis}).eq('id',id);
+  if(error){alert('Error: '+error.message);return;}
+  trackers[i].visibility=newVis;
+  showToast(newVis==='public'?'Tracker is now public':'Tracker is now private');
+  renderTrackersList();
 }
 
 function renderAll(){renderStreakBanner();renderMetrics();renderTrackersList();renderLog();renderRecentEntries();renderChartTabs();updateRestDayBtn();}

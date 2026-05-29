@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -183,6 +182,47 @@ body.dark .rest-btn{color:#fde68a}
 .challenge-bar-you{height:8px;background:var(--green);border-radius:99px;position:absolute;left:0;top:0;transition:width .4s}
 .challenge-bar-them{height:8px;background:var(--orange);border-radius:99px;position:absolute;right:0;top:0;transition:width .4s}
 .tab-badge{background:var(--orange);color:white;border-radius:99px;font-size:10px;font-weight:700;padding:1px 5px;margin-left:3px}
+
+.onboard-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;padding:2rem 1rem}
+.onboard-wrap{max-width:480px;margin:0 auto}
+.onboard-logo{width:48px;height:48px;background:var(--green);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.onboard-logo svg{width:26px;height:26px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.onboard-title{font-size:22px;font-weight:700;text-align:center;margin-bottom:6px}
+.onboard-sub{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:2rem;line-height:1.6}
+.onboard-step{display:none}.onboard-step.active{display:block}
+.onboard-progress{display:flex;gap:6px;margin-bottom:2rem;justify-content:center}
+.onboard-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .2s}
+.onboard-dot.active{background:var(--green)}
+.onboard-dot.done{background:var(--green);opacity:.4}
+.onboard-field{margin-bottom:14px}
+.onboard-field label{font-size:13px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px}
+.onboard-input{width:100%;font-size:14px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;outline:none;font-family:inherit;background:var(--input-bg);color:var(--text)}
+.onboard-input:focus{border-color:var(--green)}
+.onboard-select{width:100%;font-size:14px;padding:10px 12px;border:1px solid var(--border);border-radius:9px;outline:none;font-family:inherit;background:var(--input-bg);color:var(--text)}
+.onboard-select:focus{border-color:var(--green)}
+.onboard-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.onboard-option{border:2px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all .15s;background:var(--card-bg)}
+.onboard-option:hover{border-color:var(--green)}
+.onboard-option.selected{border-color:var(--green);background:var(--green-light)}
+.onboard-option .opt-icon{font-size:1.5rem;margin-bottom:4px}
+.onboard-option .opt-label{font-size:13px;font-weight:600}
+.onboard-option .opt-sub{font-size:11px;color:var(--text-muted);margin-top:2px}
+.onboard-btns{display:flex;gap:10px;margin-top:1.5rem}
+.onboard-next{flex:1;background:var(--green);color:white;border:none;border-radius:9px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.onboard-next:hover{background:var(--green-dark)}
+.onboard-back{background:none;border:1px solid var(--border);border-radius:9px;padding:12px 16px;font-size:14px;color:var(--text-muted);cursor:pointer;font-family:inherit}
+.onboard-back:hover{background:var(--bg)}
+.onboard-skip{text-align:center;margin-top:12px}
+.onboard-skip a{font-size:13px;color:var(--text-muted);cursor:pointer;text-decoration:underline}
+.height-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.profile-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:12px}
+.profile-avatar{width:56px;height:56px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:white;flex-shrink:0}
+.profile-stat{background:var(--summary-stat-bg);border-radius:10px;padding:10px 14px;text-align:center}
+.profile-stat-val{font-size:18px;font-weight:700}
+.profile-stat-lbl{font-size:11px;color:var(--text-muted);margin-top:2px}
+.unit-toggle{display:flex;background:var(--bg);border-radius:8px;padding:3px;gap:3px}
+.unit-btn{flex:1;padding:6px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;background:transparent;color:var(--text-muted);transition:all .15s}
+.unit-btn.active{background:var(--card-bg);color:var(--green);box-shadow:0 1px 3px rgba(0,0,0,.1)}
 </style>
 </head>
 <body>
@@ -217,6 +257,103 @@ body.dark .rest-btn{color:#fde68a}
   </div>
 </div>
 
+
+<!-- ONBOARDING -->
+<div class="onboard-screen" id="onboard-screen">
+  <div class="onboard-wrap">
+    <div class="onboard-logo"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+    <div class="onboard-title">Welcome to FitCoach!</div>
+    <div class="onboard-sub">Let's set up your profile so we can personalize your experience.</div>
+    <div class="onboard-progress" id="onboard-progress"></div>
+
+    <!-- Step 1: Name & Birthday -->
+    <div class="onboard-step active" id="ostep-0">
+      <div class="onboard-field"><label>What should we call you?</label><input class="onboard-input" id="ob-name" placeholder="Your name"/></div>
+      <div class="onboard-field"><label>Birthday</label><input class="onboard-input" type="date" id="ob-birthday"/></div>
+      <div class="onboard-field"><label>Units preference</label>
+        <div class="unit-toggle">
+          <button class="unit-btn active" id="unit-imperial" onclick="setUnits('imperial')">Imperial (lbs, ft/in)</button>
+          <button class="unit-btn" id="unit-metric" onclick="setUnits('metric')">Metric (kg, cm)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Height & Weight -->
+    <div class="onboard-step" id="ostep-1">
+      <div class="onboard-field">
+        <label id="ob-height-label">Height</label>
+        <div class="height-row" id="ob-height-imperial">
+          <div><input class="onboard-input" type="number" id="ob-height-ft" placeholder="ft" min="1" max="9"/></div>
+          <div><input class="onboard-input" type="number" id="ob-height-in" placeholder="in" min="0" max="11"/></div>
+        </div>
+        <div id="ob-height-metric" style="display:none">
+          <input class="onboard-input" type="number" id="ob-height-cm" placeholder="cm" min="50" max="300"/>
+        </div>
+      </div>
+      <div class="onboard-field">
+        <label id="ob-weight-label">Weight</label>
+        <input class="onboard-input" type="number" id="ob-weight" placeholder="e.g. 175" step="0.1"/>
+      </div>
+    </div>
+
+    <!-- Step 3: Fitness level -->
+    <div class="onboard-step" id="ostep-2">
+      <div class="onboard-field"><label>What is your fitness level?</label>
+        <div class="onboard-options" id="fitness-options">
+          <div class="onboard-option" onclick="selectOption('fitness','beginner',this)"><div class="opt-icon">&#127807;</div><div class="opt-label">Beginner</div><div class="opt-sub">Just getting started</div></div>
+          <div class="onboard-option" onclick="selectOption('fitness','intermediate',this)"><div class="opt-icon">&#128170;</div><div class="opt-label">Intermediate</div><div class="opt-sub">Training regularly</div></div>
+          <div class="onboard-option" onclick="selectOption('fitness','advanced',this)"><div class="opt-icon">&#127942;</div><div class="opt-label">Advanced</div><div class="opt-sub">Serious athlete</div></div>
+          <div class="onboard-option" onclick="selectOption('fitness','comeback',this)"><div class="opt-icon">&#128257;</div><div class="opt-label">Coming back</div><div class="opt-sub">Returning after a break</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Diet -->
+    <div class="onboard-step" id="ostep-3">
+      <div class="onboard-field"><label>Diet style</label>
+        <div class="onboard-options">
+          <div class="onboard-option" onclick="selectOption('diet','no_preference',this)"><div class="opt-icon">&#127869;</div><div class="opt-label">No preference</div><div class="opt-sub">Eat everything</div></div>
+          <div class="onboard-option" onclick="selectOption('diet','cutting',this)"><div class="opt-icon">&#128293;</div><div class="opt-label">Cutting</div><div class="opt-sub">Losing fat</div></div>
+          <div class="onboard-option" onclick="selectOption('diet','bulking',this)"><div class="opt-icon">&#128170;</div><div class="opt-label">Bulking</div><div class="opt-sub">Gaining muscle</div></div>
+          <div class="onboard-option" onclick="selectOption('diet','maintenance',this)"><div class="opt-icon">&#9878;&#65039;</div><div class="opt-label">Maintenance</div><div class="opt-sub">Staying the same</div></div>
+          <div class="onboard-option" onclick="selectOption('diet','vegan',this)"><div class="opt-icon">&#127807;</div><div class="opt-label">Vegan</div><div class="opt-sub">Plant based</div></div>
+          <div class="onboard-option" onclick="selectOption('diet','keto',this)"><div class="opt-icon">&#129385;</div><div class="opt-label">Keto</div><div class="opt-sub">Low carb</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Main goal + first tracker -->
+    <div class="onboard-step" id="ostep-4">
+      <div class="onboard-field"><label>What is your main fitness goal?</label>
+        <input class="onboard-input" id="ob-goal" placeholder="e.g. Lose 20 lbs, bench 225, run a 5K"/>
+      </div>
+      <div class="onboard-field"><label>Create your first tracker (optional)</label>
+        <input class="onboard-input" id="ob-tracker-name" placeholder="Tracker name e.g. Body weight"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+          <input class="onboard-input" type="number" id="ob-tracker-target" placeholder="Target value" step="any"/>
+          <input class="onboard-input" id="ob-tracker-unit" placeholder="Unit e.g. lbs"/>
+        </div>
+        <input class="onboard-input" type="date" id="ob-tracker-deadline" style="margin-top:8px" placeholder="Deadline (optional)"/>
+      </div>
+    </div>
+
+    <!-- Step 6: Done -->
+    <div class="onboard-step" id="ostep-5">
+      <div style="text-align:center;padding:1rem 0">
+        <div style="font-size:3rem;margin-bottom:1rem">&#127881;</div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px">You are all set!</div>
+        <div style="font-size:13px;color:var(--text-muted);line-height:1.6">Your profile is ready. Your AI coach now knows your stats and goals.</div>
+      </div>
+    </div>
+
+    <div class="onboard-btns">
+      <button class="onboard-back" id="ob-back-btn" onclick="obBack()" style="display:none">Back</button>
+      <button class="onboard-next" id="ob-next-btn" onclick="obNext()">Continue</button>
+    </div>
+    <div class="onboard-skip"><a onclick="skipOnboarding()">Skip for now</a></div>
+  </div>
+</div>
+
 <div id="main-app">
 <div class="app">
 
@@ -246,6 +383,7 @@ body.dark .rest-btn{color:#fde68a}
   <button class="nav-btn" onclick="switchTab('graphs',this)">&#128200; Graphs</button>
   <button class="nav-btn" onclick="switchTab('trackers',this)">&#9881;&#65039; Trackers</button>
   <button class="nav-btn" onclick="switchTab('friends',this)" id="friends-nav-btn">&#128101; Friends</button>
+  <button class="nav-btn" onclick="switchTab('profile',this)">&#128100; Profile</button>
   <button class="nav-btn" onclick="switchTab('coach',this)">&#129302; Coach</button>
 </div>
 
@@ -378,6 +516,12 @@ body.dark .rest-btn{color:#fde68a}
       <button class="green-btn" onclick="sendMsg()" style="padding:8px 14px">Send</button>
     </div>
   </div>
+</div>
+
+
+<!-- PROFILE TAB -->
+<div id="tab-profile" class="tab">
+  <div id="profile-content"></div>
 </div>
 
 </div>
@@ -573,11 +717,17 @@ function showAuthScreen(){document.getElementById('loading-screen').style.displa
 async function showApp(){
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('auth-screen').style.display='none';
-  document.getElementById('main-app').style.display='block';
   document.getElementById('user-email-lbl').textContent=currentUser.email;
-  setupDate();await loadData();renderAll();renderQuickPrompts();
-  if(!document.getElementById('ai-messages').children.length)
-    appendMsg(trackers.length?"Hey! I can see your tracker data. What do you want to work on today?":"Hey! Welcome to FitCoach AI. Create your first tracker to get started!",false);
+  await loadProfile();
+  await loadData();
+  if(!userProfile.onboarded){
+    showOnboarding();
+  } else {
+    document.getElementById('main-app').style.display='block';
+    setupDate();renderAll();renderQuickPrompts();
+    if(!document.getElementById('ai-messages').children.length)
+      appendMsg(trackers.length?"Hey "+( userProfile.display_name||'')+"! I can see your tracker data. What do you want to work on today?":"Hey! Welcome to FitCoach AI. Create your first tracker to get started!",false);
+  }
 }
 
 // DATA
@@ -948,7 +1098,206 @@ function switchTab(tab,btn){
   if(tab==='summary')renderSummary();
   if(tab==='todo')renderTodo();
   if(tab==='friends')renderFriendsTab();
+  if(tab==='profile')renderProfile();
 }
+
+
+// ONBOARDING & PROFILE
+let userProfile={};
+let obStep=0;const obTotalSteps=6;
+let obSelections={fitness:'',diet:''};
+let obUnits='imperial';
+
+function setUnits(u){
+  obUnits=u;
+  document.getElementById('unit-imperial').className='unit-btn'+(u==='imperial'?' active':'');
+  document.getElementById('unit-metric').className='unit-btn'+(u==='metric'?' active':'');
+  document.getElementById('ob-height-imperial').style.display=u==='imperial'?'grid':'none';
+  document.getElementById('ob-height-metric').style.display=u==='metric'?'block':'none';
+  document.getElementById('ob-height-label').textContent=u==='imperial'?'Height (ft / in)':'Height (cm)';
+  document.getElementById('ob-weight-label').textContent=u==='imperial'?'Weight (lbs)':'Weight (kg)';
+  document.getElementById('ob-weight').placeholder=u==='imperial'?'e.g. 175':'e.g. 80';
+}
+
+function selectOption(type,val,el){
+  const container=el.parentElement;
+  container.querySelectorAll('.onboard-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  obSelections[type]=val;
+}
+
+function updateObProgress(){
+  const prog=document.getElementById('onboard-progress');
+  prog.innerHTML=Array.from({length:obTotalSteps},(_,i)=>'<div class="onboard-dot'+(i<obStep?' done':i===obStep?' active':'')+'"></div>').join('');
+  document.getElementById('ob-back-btn').style.display=obStep>0?'inline-flex':'none';
+  document.getElementById('ob-next-btn').textContent=obStep===obTotalSteps-1?'Get started!':'Continue';
+  document.getElementById('.onboard-skip') && (document.querySelector('.onboard-skip').style.display=obStep===obTotalSteps-1?'none':'block');
+}
+
+function obNext(){
+  if(obStep===obTotalSteps-1){finishOnboarding();return;}
+  obStep++;
+  document.querySelectorAll('.onboard-step').forEach((s,i)=>s.classList.toggle('active',i===obStep));
+  updateObProgress();
+}
+function obBack(){
+  if(obStep===0)return;
+  obStep--;
+  document.querySelectorAll('.onboard-step').forEach((s,i)=>s.classList.toggle('active',i===obStep));
+  updateObProgress();
+}
+
+function showOnboarding(){
+  document.getElementById('onboard-screen').style.display='block';
+  document.getElementById('main-app').style.display='none';
+  obStep=0;
+  document.querySelectorAll('.onboard-step').forEach((s,i)=>s.classList.toggle('active',i===0));
+  updateObProgress();
+}
+
+async function finishOnboarding(){
+  const name=document.getElementById('ob-name').value.trim();
+  const birthday=document.getElementById('ob-birthday').value;
+  const goal=document.getElementById('ob-goal').value.trim();
+  // Height/weight conversion to metric for storage
+  let height_cm=null,weight_kg=null;
+  if(obUnits==='imperial'){
+    const ft=parseFloat(document.getElementById('ob-height-ft').value)||0;
+    const inch=parseFloat(document.getElementById('ob-height-in').value)||0;
+    if(ft||inch)height_cm=Math.round((ft*12+inch)*2.54);
+    const lbs=parseFloat(document.getElementById('ob-weight').value);
+    if(!isNaN(lbs))weight_kg=Math.round(lbs*0.453592*10)/10;
+  } else {
+    height_cm=parseFloat(document.getElementById('ob-height-cm').value)||null;
+    weight_kg=parseFloat(document.getElementById('ob-weight').value)||null;
+  }
+  const profileData={display_name:name||null,birthday:birthday||null,height_cm,weight_kg,fitness_level:obSelections.fitness||null,diet:obSelections.diet||null,goal:goal||null,units:obUnits,onboarded:true};
+  await sb.from('profiles').upsert({id:currentUser.id,email:currentUser.email,...profileData});
+  userProfile={...profileData,email:currentUser.email};
+  // Create first tracker if filled in
+  const tName=document.getElementById('ob-tracker-name').value.trim();
+  const tUnit=document.getElementById('ob-tracker-unit').value.trim();
+  const tTarget=document.getElementById('ob-tracker-target').value;
+  const tDeadline=document.getElementById('ob-tracker-deadline').value;
+  if(tName&&tUnit){
+    const{data}=await sb.from('trackers').insert({user_id:currentUser.id,name:tName,cat:'Custom',unit:tUnit,target:tTarget?parseFloat(tTarget):null,deadline:tDeadline||null,dir:'up',logtype:'latest',sort_order:0,visibility:'private'}).select().single();
+    if(data)trackers.push({id:data.id,name:data.name,cat:data.cat,unit:data.unit,target:data.target,deadline:data.deadline,dir:data.dir||'up',logtype:data.logtype||'latest',sort_order:0,visibility:'private'});
+  }
+  document.getElementById('onboard-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  renderAll();
+}
+
+async function skipOnboarding(){
+  await sb.from('profiles').upsert({id:currentUser.id,email:currentUser.email,onboarded:true});
+  userProfile={onboarded:true,units:'imperial',email:currentUser.email};
+  document.getElementById('onboard-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+}
+
+async function loadProfile(){
+  const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  userProfile=data||{units:'imperial',onboarded:false};
+  return userProfile;
+}
+
+// PROFILE PAGE
+function calcAge(birthday){
+  if(!birthday)return null;
+  const today=new Date();const birth=new Date(birthday);
+  let age=today.getFullYear()-birth.getFullYear();
+  if(today.getMonth()<birth.getMonth()||(today.getMonth()===birth.getMonth()&&today.getDate()<birth.getDate()))age--;
+  return age;
+}
+function cmToFtIn(cm){const totalIn=cm/2.54;const ft=Math.floor(totalIn/12);const inch=Math.round(totalIn%12);return ft+'ft '+inch+'in';}
+function kgToLbs(kg){return Math.round(kg*2.2046*10)/10;}
+function calcBMI(weight_kg,height_cm){if(!weight_kg||!height_cm)return null;const hm=height_cm/100;return Math.round((weight_kg/(hm*hm))*10)/10;}
+function bmiCategory(bmi){if(!bmi)return '';if(bmi<18.5)return 'Underweight';if(bmi<25)return 'Normal';if(bmi<30)return 'Overweight';return 'Obese';}
+
+function renderProfile(){
+  const el=document.getElementById('profile-content');
+  const p=userProfile;
+  const isImperial=(p.units||'imperial')==='imperial';
+  const age=calcAge(p.birthday);
+  const heightStr=p.height_cm?(isImperial?cmToFtIn(p.height_cm):p.height_cm+' cm'):null;
+  const weightStr=p.weight_kg?(isImperial?kgToLbs(p.weight_kg)+' lbs':p.weight_kg+' kg'):null;
+  const bmi=calcBMI(p.weight_kg,p.height_cm);
+  const streak=calcStreak();
+  const totalLogs=logs.length;
+  const totalPRs=trackers.filter(t=>getTrackerPR(t.id)!==null).length;
+
+  let html='';
+
+  // Header card
+  html+='<div class="profile-card"><div style="display:flex;align-items:center;gap:14px;margin-bottom:1rem">';
+  html+='<div class="profile-avatar">'+(p.display_name?p.display_name[0].toUpperCase():(p.email||'?')[0].toUpperCase())+'</div>';
+  html+='<div><div style="font-size:18px;font-weight:700">'+(p.display_name||'FitCoach User')+'</div>';
+  html+='<div style="font-size:13px;color:var(--text-muted)">'+(p.email||'')+'</div>';
+  html+=age?'<div style="font-size:12px;color:var(--text-muted);margin-top:2px">'+age+' years old</div>':'';
+  html+='</div></div>';
+
+  // Stats row
+  html+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+  html+='<div class="profile-stat"><div class="profile-stat-val">'+streak+'</div><div class="profile-stat-lbl">Day streak</div></div>';
+  html+='<div class="profile-stat"><div class="profile-stat-val">'+totalLogs+'</div><div class="profile-stat-lbl">Total logs</div></div>';
+  html+='<div class="profile-stat"><div class="profile-stat-val">'+totalPRs+'</div><div class="profile-stat-lbl">PRs set</div></div>';
+  html+='</div></div>';
+
+  // Body stats
+  html+='<div class="sec-title">Body stats</div><div class="profile-card">';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  html+=heightStr?'<div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Height</div><div style="font-size:15px;font-weight:600">'+heightStr+'</div></div>':'';
+  html+=weightStr?'<div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Weight</div><div style="font-size:15px;font-weight:600">'+weightStr+'</div></div>':'';
+  html+=bmi?'<div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">BMI</div><div style="font-size:15px;font-weight:600">'+bmi+' <span style="font-size:12px;color:var(--text-muted)">'+bmiCategory(bmi)+'</span></div></div>':'';
+  html+=p.fitness_level?'<div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Fitness level</div><div style="font-size:15px;font-weight:600;text-transform:capitalize">'+p.fitness_level.replace('_',' ')+'</div></div>':'';
+  html+=p.diet?'<div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Diet</div><div style="font-size:15px;font-weight:600;text-transform:capitalize">'+p.diet.replace('_',' ')+'</div></div>':'';
+  html+=p.goal?'<div style="grid-column:1/-1"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Main goal</div><div style="font-size:14px;font-weight:600">'+p.goal+'</div></div>':'';
+  html+='</div>';
+  if(!heightStr&&!weightStr&&!p.fitness_level)html+='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:0.5rem">No body stats set yet.</div>';
+  html+='</div>';
+
+  // Units
+  html+='<div class="sec-title">Preferences</div><div class="profile-card">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:600">Units</div>';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:13px;font-weight:600">Units</div><div id="profile-unit-toggle"></div></div>';
+  html+='</div>';
+
+  // Edit button
+  html+='<button class="green-btn" style="width:100%;justify-content:center" onclick="openEditProfile()">&#9998; Edit profile</button>';
+
+  el.innerHTML=html;
+}
+
+async function updateUnits(u){
+  userProfile.units=u;
+  await sb.from('profiles').upsert({id:currentUser.id,email:currentUser.email,units:u});
+  document.querySelectorAll('.unit-toggle .unit-btn').forEach(b=>{b.classList.toggle('active',b.textContent.toLowerCase().startsWith(u));});
+  renderProfile();
+}
+
+function openEditProfile(){
+  const p=userProfile;
+  const isImperial=(p.units||'imperial')==='imperial';
+  // Reuse onboarding screen as edit mode
+  obStep=0;obUnits=p.units||'imperial';
+  document.getElementById('ob-name').value=p.display_name||'';
+  document.getElementById('ob-birthday').value=p.birthday||'';
+  setUnits(obUnits);
+  if(p.height_cm){
+    if(isImperial){const totalIn=p.height_cm/2.54;document.getElementById('ob-height-ft').value=Math.floor(totalIn/12);document.getElementById('ob-height-in').value=Math.round(totalIn%12);}
+    else document.getElementById('ob-height-cm').value=p.height_cm;
+  }
+  if(p.weight_kg){document.getElementById('ob-weight').value=isImperial?Math.round(kgToLbs(p.weight_kg)*10)/10:p.weight_kg;}
+  if(p.fitness_level){document.querySelectorAll('#fitness-options .onboard-option').forEach(o=>{if(o.getAttribute('onclick')&&o.getAttribute('onclick').includes(p.fitness_level))o.classList.add('selected');});}
+  obSelections.fitness=p.fitness_level||'';obSelections.diet=p.diet||'';
+  document.getElementById('ob-goal').value=p.goal||'';
+  document.getElementById('ob-tracker-name').value='';document.getElementById('ob-tracker-unit').value='';document.getElementById('ob-tracker-target').value='';document.getElementById('ob-tracker-deadline').value='';
+  document.querySelectorAll('.onboard-step').forEach((s,i)=>s.classList.toggle('active',i===0));
+  updateObProgress();
+  document.getElementById('onboard-screen').style.display='block';
+  document.getElementById('main-app').style.display='none';
+}
+
 
 // FRIENDS & CHALLENGES
 let friends=[],pendingReceived=[],pendingSent=[],challenges=[],challengeLogs=[],friendProfiles={},challengeLogsCache={};

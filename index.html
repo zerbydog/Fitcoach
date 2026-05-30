@@ -680,6 +680,12 @@ body.dark .rest-btn{color:#fde68a}
         <option value="biggest_loss">Biggest loss (most decrease)</option>
       </select>
     </div>
+    <div class="modal-row"><label>How to count progress</label>
+      <select id="ch-logtype">
+        <option value="best">Best single entry (bench press, mile time)</option>
+        <option value="cumulative">Cumulative total (steps, minutes, calories)</option>
+      </select>
+    </div>
     <div class="modal-row"><label>Your starting value</label><input id="ch-start" type="number" placeholder="e.g. 185" step="any"/></div>
     <div class="modal-row"><label>Start date</label><input id="ch-start-date" type="date"/></div>
     <div class="modal-row"><label>End date</label><input id="ch-end-date" type="date"/></div>
@@ -695,6 +701,7 @@ body.dark .rest-btn{color:#fde68a}
   <div class="modal">
     <div class="modal-title" id="clog-title">Log progress</div>
     <div class="modal-row"><label id="clog-unit-lbl">Current value</label><input id="clog-val" type="number" step="any"/></div>
+    <div class="modal-row"><label>Date</label><input id="clog-date" type="date"/></div>
     <div class="modal-btns">
       <button class="ghost-btn" onclick="document.getElementById('challenge-log-modal').classList.remove('open')">Cancel</button>
       <button class="green-btn" onclick="saveChallengeLog()">Log it</button>
@@ -826,7 +833,12 @@ function setupDate(){
   document.getElementById('log-date').value=todayStr();
   updateRestDayBtn();
 }
-function todayStr(){return new Date().toISOString().slice(0,10);}
+function todayStr(){
+  const d=new Date();
+  const offset=d.getTimezoneOffset();
+  const local=new Date(d.getTime()-offset*60000);
+  return local.toISOString().slice(0,10);
+}
 function daysUntil(ds){if(!ds)return null;return Math.ceil((new Date(ds)-new Date(todayStr()))/86400000);}
 function formatDeadline(ds){const d=daysUntil(ds);if(d===null)return '';if(d<0)return 'Deadline passed';if(d===0)return 'Due today!';if(d===1)return '1 day left';return d+' days left';}
 const CAT_COLORS={Strength:{bg:'#dbeafe',text:'#1e40af'},Cardio:{bg:'#d1fae5',text:'#065f46'},Basketball:{bg:'#fef3c7',text:'#92400e'},Nutrition:{bg:'#dcfce7',text:'#166534'},Sleep:{bg:'#ede9fe',text:'#4c1d95'},Recovery:{bg:'#fee2e2',text:'#991b1b'},Custom:{bg:'#f3f4f6',text:'#374151'}};
@@ -1713,6 +1725,7 @@ function openNewChallenge(fid){
   document.getElementById('ch-name').value='';
   document.getElementById('ch-unit').value='';
   document.getElementById('ch-start').value='';
+  document.getElementById('ch-logtype').value='best';
   document.getElementById('ch-start-date').value=todayStr();
   const end=new Date();end.setDate(end.getDate()+7);
   document.getElementById('ch-end-date').value=end.toISOString().slice(0,10);
@@ -1732,9 +1745,10 @@ async function saveChallenge(){
   if(new Date(endDate)<=new Date(startDate)){alert('End date must be after start date.');return;}
   const direction=(metric==='absolute_down'||metric==='biggest_loss')?'down':'up';
   const btn=document.getElementById('ch-save-btn');btn.disabled=true;btn.textContent='Sending...';
+  const logType=document.getElementById('ch-logtype').value;
   const{data,error}=await sb.from('challenges').insert({
     creator_id:currentUser.id,opponent_id:opponent,name,metric,direction,unit,
-    start_date:startDate,end_date:endDate,status:'pending',creator_start:startVal
+    start_date:startDate,end_date:endDate,status:'pending',creator_start:startVal,log_type:logType
   }).select().single();
   btn.disabled=false;btn.textContent='Send challenge';
   if(error){alert('Error: '+error.message);return;}
@@ -1761,17 +1775,19 @@ async function declineChallenge(id){
 
 function openChallengeLog(id){
   loggingChallengeId=id;
-  const c=challenges.find(x=>x.id===id);
-  document.getElementById('clog-title').textContent='Log progress — '+c.name;
-  document.getElementById('clog-unit-lbl').textContent='Current value ('+c.unit+')';
+  const ch2=challenges.find(x=>x.id===id);
+  document.getElementById('clog-title').textContent='Log progress — '+ch2.name;
+  document.getElementById('clog-unit-lbl').textContent='Current value ('+ch2.unit+')'+(ch2.log_type==='cumulative'?' — cumulative total':'');
   document.getElementById('clog-val').value='';
+  document.getElementById('clog-date').value=todayStr();
   document.getElementById('challenge-log-modal').classList.add('open');
 }
 
 async function saveChallengeLog(){
   const val=parseFloat(document.getElementById('clog-val').value);
   if(isNaN(val))return;
-  const{data,error}=await sb.from('challenge_logs').insert({challenge_id:loggingChallengeId,user_id:currentUser.id,val,date:todayStr()}).select().single();
+  const clogDate=document.getElementById('clog-date').value||todayStr();
+  const{data,error}=await sb.from('challenge_logs').insert({challenge_id:loggingChallengeId,user_id:currentUser.id,val,date:clogDate}).select().single();
   if(error){alert('Error: '+error.message);return;}
   challengeLogs.push(data);
   document.getElementById('challenge-log-modal').classList.remove('open');
@@ -1783,18 +1799,26 @@ function getLatestChallengeVal(challengeId,userId){
   return entries.length?entries[0].val:null;
 }
 
-function calcProgress(c,userId){
-  const isCreator=c.creator_id===userId;
-  const startVal=isCreator?c.creator_start:c.opponent_start;
-  const latest=getLatestChallengeVal(c.id,userId);
+function getChallengeCurrentVal(challengeId,userId,logType){
+  const entries=challengeLogs.filter(l=>l.challenge_id===challengeId&&l.user_id===userId);
+  if(!entries.length)return null;
+  if(logType==='cumulative')return entries.reduce((a,b)=>a+b.val,0);
+  // best — return max or min depending on direction
+  return entries.sort((a,b)=>b.date.localeCompare(a.date))[0].val;
+}
+function calcProgress(ch,userId){
+  const isCreator=ch.creator_id===userId;
+  const startVal=isCreator?ch.creator_start:ch.opponent_start;
   if(startVal===null||startVal===undefined)return null;
-  const current=latest!==null?latest:startVal;
-  if(c.metric==='percent'){
+  const logType=ch.log_type||'best';
+  const current=getChallengeCurrentVal(ch.id,userId,logType);
+  if(current===null)return null;
+  if(ch.metric==='percent'){
     if(startVal===0)return 0;
     return((current-startVal)/Math.abs(startVal))*100;
   }
-  if(c.metric==='biggest_gain')return current-startVal;
-  if(c.metric==='biggest_loss')return startVal-current;
+  if(ch.metric==='biggest_gain')return current-startVal;
+  if(ch.metric==='biggest_loss')return startVal-current;
   return current;
 }
 
@@ -2005,10 +2029,18 @@ async function renderChallengeChart(ch,myId,oppId,oppEmail){
   if(!canvas)return;
 
   // Get all logs for this challenge from both players
-  const myLogs=challengeLogs.filter(l=>l.challenge_id===ch.id&&l.user_id===myId).sort((a,b)=>a.date.localeCompare(b.date));
+  const allMyLogs=challengeLogs.filter(l=>l.challenge_id===ch.id&&l.user_id===myId).sort((a,b)=>a.date.localeCompare(b.date));
+  const isCumulative=(ch.log_type||'best')==='cumulative';
+  // For cumulative, sum per day
+  function aggregateChalLogs(logs){
+    if(!isCumulative)return logs;
+    const dayMap={};logs.forEach(l=>{dayMap[l.date]=(dayMap[l.date]||0)+l.val;});
+    return Object.entries(dayMap).sort((a,b)=>a[0].localeCompare(b[0])).map(([date,val])=>({date,val}));
+  }
+  const myLogs=aggregateChalLogs(allMyLogs);
   // Fetch opponent logs if not already cached
   if(!challengeLogsCache){challengeLogsCache={};}
-  let oppLogs=challengeLogs.filter(l=>l.challenge_id===ch.id&&l.user_id===oppId).sort((a,b)=>a.date.localeCompare(b.date));
+  let oppLogs=aggregateChalLogs(challengeLogs.filter(l=>l.challenge_id===ch.id&&l.user_id===oppId).sort((a,b)=>a.date.localeCompare(b.date)));
 
   if(!myLogs.length&&!oppLogs.length){
     canvas.parentElement.innerHTML='<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:8px">No progress logged yet — be the first!</div>';

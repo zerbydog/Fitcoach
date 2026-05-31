@@ -58,8 +58,8 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 .icon-btn:hover{color:var(--text);border-color:var(--text-muted)}
 .signout-btn{font-size:12px;color:var(--text-muted);background:var(--card-bg);padding:5px 11px;border-radius:8px;border:1px solid var(--border);cursor:pointer;font-family:inherit;transition:all .15s}
 .signout-btn:hover{color:var(--orange);border-color:var(--orange)}
-.nav{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:1.25rem;background:var(--nav-bg);border-radius:10px 10px 0 0;padding:4px 4px 0;overflow-x:auto}
-.nav-btn{background:none;border:none;padding:9px 11px;font-size:12px;font-family:inherit;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:4px;font-weight:500;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.nav{display:flex;gap:1px;border-bottom:1px solid var(--border);margin-bottom:1.25rem;background:var(--nav-bg);border-radius:10px 10px 0 0;padding:3px 3px 0;overflow-x:hidden;flex-wrap:nowrap}
+.nav-btn{background:none;border:none;padding:7px 7px;font-size:11px;font-family:inherit;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:3px;font-weight:500;transition:all .15s;white-space:nowrap;flex-shrink:1;flex:1;justify-content:center}
 .nav-btn.active{color:var(--green);border-bottom-color:var(--green);font-weight:600;background:var(--green-light)}
 body.dark .nav-btn.active{background:rgba(29,158,117,0.15)}
 .nav-btn:hover:not(.active){color:var(--text);background:var(--bg)}
@@ -1005,7 +1005,7 @@ function renderRecentEntries(){
   if(!sorted.length){el.innerHTML='<div class="no-data">No entries yet. Log something above!</div>';return;}
   const groups={};
   sorted.forEach(l=>{if(!groups[l.date])groups[l.date]=[];groups[l.date].push(l);});
-  const dates=Object.keys(groups).slice(0,10);
+  const dates=Object.keys(groups).sort((a,b)=>b.localeCompare(a)).slice(0,5);
   el.innerHTML=dates.map(date=>{
     const items=groups[date];const isRest=restDays.includes(date);
     const restTag=isRest?'<span style="font-size:11px;background:rgba(245,158,11,0.1);color:#92400e;border-radius:4px;padding:2px 6px;margin-left:8px">rest day</span>':'';
@@ -1880,14 +1880,16 @@ function renderChallenges(){
       }
       const card=document.createElement('div');card.className='challenge-card active-challenge';
       card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><div style="font-size:14px;font-weight:700">'+ch.name+'</div><span class="badge" style="background:var(--green-light);color:var(--green)">Active</span></div>'
-        +'<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">vs '+oppEmail+' &middot; '+(daysLeft!==null&&daysLeft>=0?daysLeft+' days left':daysLeft<0?'ended':'')+'</div>'
+        +'<div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">vs '+oppEmail+' &middot; '+(daysLeft!==null&&daysLeft>=0?daysLeft+' days left':daysLeft<0?'ended':'')+(ch.log_type==='cumulative'?' &middot; cumulative':'')+'</div>'
         +'<div class="challenge-vs"><div class="challenge-player"><div class="challenge-player-name">You</div><div class="challenge-player-val">'+fmt(myProg)+'</div><div class="challenge-player-delta" style="color:var(--text-muted)">'+fmtStart(myStart)+'</div></div>'
         +'<div class="challenge-divider">vs</div>'
         +'<div class="challenge-player"><div class="challenge-player-name">'+oppEmail.split('@')[0]+'</div><div class="challenge-player-val">'+fmt(theirProg)+'</div><div class="challenge-player-delta" style="color:var(--text-muted)">'+fmtStart(theirStart)+'</div></div></div>'
         +(myProg!==null||theirProg!==null?'<div class="challenge-bar-wrap"><div class="challenge-bar-you" style="width:'+barYou+'%"></div><div class="challenge-bar-them" style="width:'+barThem+'%"></div></div>':'')
-        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">'+whoLeading;
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px">'+whoLeading+'</div>';
       const logBtn=document.createElement('button');logBtn.className='green-btn';logBtn.style.cssText='font-size:12px;padding:6px 12px';logBtn.textContent='Log progress';logBtn.onclick=()=>openChallengeLog(ch.id);
-      card.appendChild(logBtn);
+      // Find the last flex row and append button there
+      const lastRow=card.querySelector('div[style*="justify-content:space-between"][style*="margin-top:8px"]');
+      if(lastRow)lastRow.appendChild(logBtn);else card.appendChild(logBtn);
       // Mini progress chart
       const chartWrap=document.createElement('div');chartWrap.style.cssText='position:relative;width:100%;height:160px;margin-top:12px';
       const canvas=document.createElement('canvas');canvas.id='challenge-chart-'+ch.id;
@@ -2153,8 +2155,14 @@ function appendMsg(text,isUser){
     saveBtn.style.cssText='position:absolute;top:6px;right:6px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-light);opacity:0;transition:opacity .2s;padding:2px';
     saveBtn.innerHTML='&#128190;';saveBtn.title='Save to library';
     saveBtn.onclick=()=>openSaveToLibrary(text);
-    wrap.addEventListener('mouseenter',()=>saveBtn.style.opacity='1');
-    wrap.addEventListener('mouseleave',()=>saveBtn.style.opacity='0');
+    // Show on hover (desktop) and always visible on touch devices
+    const isTouchDevice=()=>window.matchMedia('(hover:none)').matches;
+    if(isTouchDevice()){
+      saveBtn.style.opacity='1';
+    } else {
+      wrap.addEventListener('mouseenter',()=>saveBtn.style.opacity='1');
+      wrap.addEventListener('mouseleave',()=>saveBtn.style.opacity='0');
+    }
     wrap.appendChild(saveBtn);
   }
   document.getElementById('ai-messages').appendChild(wrap);
